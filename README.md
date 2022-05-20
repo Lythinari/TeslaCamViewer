@@ -16,8 +16,11 @@ Root Folder
 Run the following *nix command to get a list of files 
 ```
 find ./TeslaCam -print | sort -n | grep back.mp4 >> videos.txt
+
+dir /a-D /S /B /ON > videos.txt
 ```
-Note: I do not know the windows equivalent
+
+
 
 The output file should look like the following(It should only be rear camera videos in the list);
 ```
