@@ -12,16 +12,17 @@ Root Folder
     |- Sentry Videos
     |- ...
 ```
+Open the `index.html` file. This should open it in a browser window and you'll be greeted with a very plain looking HTML page with a textarea at the bottom.
+
 
 Run the following *nix command to get a list of files 
 ```
-find ./TeslaCam -print | sort -n | grep back.mp4 >> videos.txt
-
-dir /a-D /S /B /ON > videos.txt
+find ./TeslaCam -print | sort -n | grep back.mp4
 ```
-
-
-
+Or the windows command
+```
+dir /a-D /S /B /ON *-back.mp4
+```
 The output file should look like the following(It should only be rear camera videos in the list);
 ```
 ./TeslaCam/SavedClips/2022-04-11_19-23-07/2022-04-11_19-12-27-back.mp4
@@ -29,4 +30,5 @@ The output file should look like the following(It should only be rear camera vid
 ./TeslaCam/SavedClips/2022-04-11_19-23-07/2022-04-11_19-14-27-back.mp4
 ```
 
-Copy the contents into the `textarea` in the webpage and push `setVideo`
+Copy the contents into the `textarea` in the webpage and push the `Set Video` button.
+This will load the videos and play them accordingly.
