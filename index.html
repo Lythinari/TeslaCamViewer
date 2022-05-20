@@ -1,54 +1,62 @@
 <html>
-<style>
-    div {
-        border:1px solid;
-        align-content: center;
-    }
-    div.title {
-        font-size: 35px;
+    <head>
+        <style>
+            div {
+                border:1px solid;
+                align-content: center;
+            }
+            div.title {
+                font-size: 35px;
+            }
+            div.title>span {
+                color: red;
+            }
+            div>div {
+                display: inline-block;
+            }
+            video {
+                width: 400px;
+                height: 300px;
+            }
+        
+            table tr td {
+                border:1px solid;
+                text-align: center;
+            }
+        
+        
+            textarea {
+                width: 100%;
+            }
+        
+            div.readme {
+                padding: 5px;
+            }
+        </style>
+    </head>
+    <body>
+        <div class="title"><span>No Videos Set See Below</span></div>
+        <table>
+            <tr><td colspan="3"><video class="front" src="" controls controlsList="play pause"></video></td></tr>
+            <tr>
+                <td><video class="left_repeater" src="" controls controlsList="play pause"></video></td>
+                <td>FORWARD ^</td>
+                <td><video class="right_repeater" src="" controls controlsList="play pause"></video></td>
+            </tr>
+            <tr><td colspan="3"><video class="back" src="" controls controlsList="play pause"></video></td></tr>
+            <tr><td><button class="previous">Previous</button></td><td><input type="checkbox" name="autoplay"/>Autoplay</td><td><button class="next">Next</button></td></tr>
+        </table>        
+        <div>
+            <h3>Input Video List Here:</h3>
+            <textarea name="files" id="" cols="30" rows="10"></textarea>
+            <button class="setVideos">Set Videos</button>
+        </div>
+    </body>
 
-    }
-    div>div {
-        display: inline-block;
-    }
-    video {
-        width: 400px;
-        height: 300px;
-    }
-
-    table tr td {
-        border:1px solid;
-        text-align: center;
-    }
 
 
-    textarea {
-        width: 100%;
-    }
 
-    div.readme {
-        padding: 5px;
-    }
-</style>
 
-<div class="title"></div>
-<table>
-    <tr><td colspan="3"><video class="front" src="" controls controlsList="play pause"></video></td></tr>
-    <tr>
-        <td><video class="left_repeater" src="" controls controlsList="play pause"></video></td>
-        <td>FORWARD ^</td>
-        <td><video class="right_repeater" src="" controls controlsList="play pause"></video></td>
-    </tr>
-    <tr><td colspan="3"><video class="back" src="" controls controlsList="play pause"></video></td></tr>
-    <tr><td><button class="previous">Previous</button></td><td><input type="checkbox" name="autoplay"/>Autoplay</td><td><button class="next">Next</button></td></tr>
-</table>
-
-<div>
-Enter Video List Here:
-<textarea name="files" id="" cols="30" rows="10">
-</textarea>
-<button class="setVideos">Set Videos</button>
-</div>
 
 <div class="readme">
 <h2>README</h2>
@@ -69,15 +77,22 @@ Openning the <code>index.html</code> file in a browser should be able to show th
 <hr/>
 <strong>Command to run the file list</strong><br/>
 On *nix terminal running the following command on the TeslaCam folder<br/><br/>
-<code>find ./TeslaCam -print | sort -n | grep back.mp4 >> videos.txt</code><br/><br/>
-Dataset should look like this:<br/>
+<code>find ./TeslaCam -print | sort -n | grep back.mp4</code><br/><br/>
+On windows this command will do the same thing in its directory<br/>
+<code>dir /a-D /S /B /ON *-back.mp4</code><br/><br/>
+Copy the output, the dataset should look like this(or similar to the following):<br/>
 <code>
 ./TeslaCam/SavedClips/2022-04-11_19-23-07/2022-04-11_19-12-27-back.mp4<br/>
 ./TeslaCam/SavedClips/2022-04-11_19-23-07/2022-04-11_19-13-27-back.mp4<br/>
 ./TeslaCam/SavedClips/2022-04-11_19-23-07/2022-04-11_19-14-27-back.mp4<br/>
 </code><br/>
 Note:<br/>
-Only one of the 4 videos are listed in the input - the command filters out the other videos.<br/>
+Only the <strong>back</strong> videos are listed, this is on purpose.<br/>
+<hr/>
+Copy the output from the command into the textarea and push <strong>Set Videos</strong>
+This should load the videos and start playing them<br/>
+
+
 </div>
 
 <script>
