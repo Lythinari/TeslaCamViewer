@@ -1,0 +1,203 @@
+<html>
+<style>
+    div {
+        border:1px solid;
+        align-content: center;
+    }
+    div.title {
+        font-size: 35px;
+
+    }
+    div>div {
+        display: inline-block;
+    }
+    video {
+        width: 400px;
+        height: 300px;
+    }
+
+    table tr td {
+        border:1px solid;
+        text-align: center;
+    }
+
+
+    textarea {
+        width: 100%;
+    }
+
+    div.readme {
+        padding: 5px;
+    }
+</style>
+
+<div class="title"></div>
+<table>
+    <tr><td colspan="3"><video class="front" src="" controls controlsList="play pause"></video></td></tr>
+    <tr>
+        <td><video class="left_repeater" src="" controls controlsList="play pause"></video></td>
+        <td>FORWARD ^</td>
+        <td><video class="right_repeater" src="" controls controlsList="play pause"></video></td>
+    </tr>
+    <tr><td colspan="3"><video class="back" src="" controls controlsList="play pause"></video></td></tr>
+    <tr><td><button class="previous">Previous</button></td><td><input type="checkbox" name="autoplay"/>Autoplay</td><td><button class="next">Next</button></td></tr>
+</table>
+
+<div>
+Enter Video List Here:
+<textarea name="files" id="" cols="30" rows="10">
+</textarea>
+<button class="setVideos">Set Videos</button>
+</div>
+
+<div class="readme">
+<h2>README</h2>
+<hr/>
+<strong>Directory Placement</strong><br/>
+This <code>index.html</code> file must be at the same level as the <code>TeslaCam</code> folder which can be extracted directly from the USB drive.<br/>
+<code>
+Root Folder<br/>
+|- index.html<br/>
+|- TeslaCam(USB Drive Top Level Folder)<br/>
+&nbsp;&nbsp;&nbsp;|- Saved Clips<br/>
+&nbsp;&nbsp;&nbsp;|- Sentry Videos<br/>
+&nbsp;&nbsp;&nbsp;|- ...<br/>
+</code><br/>
+
+Openning the <code>index.html</code> file in a browser should be able to show this page<br/>
+
+<hr/>
+<strong>Command to run the file list</strong><br/>
+On *nix terminal running the following command on the TeslaCam folder<br/><br/>
+<code>find ./TeslaCam -print | sort -n | grep back.mp4 >> videos.txt</code><br/><br/>
+Dataset should look like this:<br/>
+<code>
+./TeslaCam/SavedClips/2022-04-11_19-23-07/2022-04-11_19-12-27-back.mp4<br/>
+./TeslaCam/SavedClips/2022-04-11_19-23-07/2022-04-11_19-13-27-back.mp4<br/>
+./TeslaCam/SavedClips/2022-04-11_19-23-07/2022-04-11_19-14-27-back.mp4<br/>
+</code><br/>
+Note:<br/>
+Only one of the 4 videos are listed in the input - the command filters out the other videos.<br/>
+</div>
+
+<script>
+    var carousel = []
+    
+    var title = document.querySelector("div.title")
+
+    var backVideo = document.querySelector("video.back")
+    var frontVideo = document.querySelector("video.front")
+    var leftVideo = document.querySelector("video.left_repeater")
+    var rightVideo = document.querySelector("video.right_repeater")
+
+    var next = document.querySelector("button.next")
+    var previous = document.querySelector("button.previous")
+
+    var setVideos = document.querySelector("button.setVideos")
+
+    setVideos.addEventListener("click", function(e){
+        tmpCarousel = []
+        carousel = document.querySelector("textarea[name=files]").value.split('\n');
+        carousel.forEach(entry => {
+            if(entry.length == 0) {
+                return
+            }
+            if(entry.endsWith("-back.mp4")){
+                tmpCarousel.push(entry.replace(/-back.mp4$/gm,''))
+            } else {
+                tmpCarousel.push(entry)
+            }
+        })
+        carousel = tmpCarousel
+        loadVideos(0)
+    })
+
+    function loadVideos(index){
+        title.innerHTML = carousel[index]
+        backVideo.src = carousel[index]+"-back.mp4"
+        frontVideo.src = carousel[index]+"-front.mp4"
+        leftVideo.src = carousel[index]+"-left_repeater.mp4"
+        rightVideo.src = carousel[index]+"-right_repeater.mp4"
+    }
+
+    function playVideos(){
+        frontVideo.play()
+        backVideo.play()
+        leftVideo.play()
+        rightVideo.play()
+    }
+
+    function pauseVideos(){
+        frontVideo.pause()
+        backVideo.pause()
+        leftVideo.pause()
+        rightVideo.pause()
+    }
+
+    let videos = document.querySelectorAll("video");
+    videos.forEach(video => {
+        video.addEventListener("play", function(e){
+            console.log(e)
+            playVideos()
+        })
+
+        video.addEventListener("pause", function(e){
+            console.log(e)
+            if(e.target.ended){
+                if(document.querySelector("input[name=autoplay]").checked){
+                    carouselIndex+=1
+                    loadVideos(carouselIndex)
+                }
+            } else {
+                pauseVideos()
+            }
+        })
+
+        video.addEventListener("click", function(e){
+            console.log(e)
+            var currentTime = e.target.currentTime
+            if(e.target != frontVideo) {
+                frontVideo.currentTime = currentTime
+            }
+            if(e.target != leftVideo) {
+                leftVideo.currentTime = currentTime
+            }
+            if(e.target != rightVideo) {
+                rightVideo.currentTime = currentTime
+            }
+            if(e.target != backVideo) {
+                backVideo.currentTime = currentTime
+            }
+        })
+
+        video.addEventListener("canplaythrough", function(e){
+            console.log("Can Play Through")
+            if(document.querySelector("input[name=autoplay]").checked){
+                playVideos()
+            }
+        })
+    })
+    
+    var carouselIndex = 0
+    
+    next.addEventListener("click", function(){
+        carouselIndex+=1
+        loadVideos(carouselIndex)
+    })
+
+    previous.addEventListener("click", function(){
+        carouselIndex-=1
+        loadVideos(carouselIndex)
+    })
+
+    backVideo.addEventListener("ended", function(){
+        console.log("Ended")
+        if(document.querySelector("input[name=autoplay]").checked){
+            carouselIndex+=1
+            loadVideos(carouselIndex)
+        }
+    })
+
+</script>
+
+</html>
