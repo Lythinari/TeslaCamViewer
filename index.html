@@ -15,8 +15,8 @@
                 display: inline-block;
             }
             video {
-                width: 400px;
-                height: 300px;
+                width: 600px;
+                height: 450px;
             }
         
             table tr td {
@@ -37,14 +37,13 @@
     <body>
         <div class="title"><span>No Videos Set See Below</span></div>
         <table>
-            <tr><td colspan="3"><video class="front" src="" controls controlsList="play pause"></video></td></tr>
             <tr>
-                <td><video class="left_repeater" src="" controls controlsList="play pause"></video></td>
-                <td>FORWARD ^</td>
+                <td><video class="left_repeater"  src="" controls controlsList="play pause"></video></td>
+                <td><video class="front"          src="" controls controlsList="play pause"></video></td>
                 <td><video class="right_repeater" src="" controls controlsList="play pause"></video></td>
             </tr>
             <tr><td colspan="3"><video class="back" src="" controls controlsList="play pause"></video></td></tr>
-            <tr><td><button class="previous">Previous</button></td><td><input type="checkbox" name="autoplay"/>Autoplay</td><td><button class="next">Next</button></td></tr>
+            <tr><td><button class="previous">Previous</button></td><td><input checked type="checkbox" name="autoplay"/>Autoplay</td><td><button class="next">Next</button></td></tr>
         </table>        
         <div>
             <h3>Input Video List Here:</h3>
