@@ -6,7 +6,7 @@
                 align-content: center;
             }
             div.title {
-                font-size: 35px;
+                font-size: 15px;
             }
             div.title>span {
                 color: red;
@@ -18,43 +18,49 @@
                 width: 600px;
                 height: 450px;
             }
-        
             table tr td {
                 border:1px solid;
                 text-align: center;
             }
-        
-        
             textarea {
                 width: 100%;
             }
-        
             div.readme {
                 padding: 5px;
             }
         </style>
     </head>
     <body>
-        <div class="title"><span>No Videos Set See Below</span></div>
+		<input type="file"><button class="setVideos">Set Videos</button><textarea name="files" cols="60" rows="1" placeholder="Select list.txt and click Set videos for load"></textarea>
+		<button onclick="playRateSlow()">0.5x</button>
+		<button onclick="playRateNormal()">1x</button>
+		<button onclick="playRateMax()">8x</button>
+		<input checked type="checkbox" name="autoplay"/>Autoplay
+		<button class="previous"><<<<<</button>
+		<button class="next">>>>>></button>
+		
+	    <br/>
+		<div class="title"><span>No Videos</span></div>
+		
         <table>
-            <tr>
+			<tr>
                 <td><video class="left_repeater"  src="" controls controlsList="play pause"></video></td>
                 <td><video class="front"          src="" controls controlsList="play pause"></video></td>
                 <td><video class="right_repeater" src="" controls controlsList="play pause"></video></td>
             </tr>
-            <tr><td colspan="3"><video class="back" src="" controls controlsList="play pause"></video></td></tr>
-            <tr><td><button class="previous">Previous</button></td><td><input checked type="checkbox" name="autoplay"/>Autoplay</td><td><button class="next">Next</button></td></tr>
-        </table>        
-        <div>
-            <h3>Input Video List Here:</h3>
-            <textarea name="files" id="" cols="30" rows="10"></textarea>
-            <button class="setVideos">Set Videos</button>
-        </div>
-    </body>
-
-
-
-
+			
+			<tr>
+				<td colspan="3"><video class="back" src="" controls controlsList="play pause"></video></td>
+			</tr>
+		</table> 
+		
+		    
+	    <input type="file" id="filepicker" accept="video/mp4" webkitdirectory multiple/>
+	    <select id="vedioSelect" onchange="listVedio()"></select>
+	    
+		<div><ul id="listing"></ul></div>
+		
+	</body>
 
 
 <div class="readme">
@@ -95,20 +101,141 @@ This should load the videos and start playing them<br/>
 </div>
 
 <script>
+    //SelectBox
+	
+    const VedioSelectBox = document.getElementById("vedioSelect");
+	const videoes = new Array(document.getElementById('video1'),document.getElementById('video2'),document.getElementById('video3'),document.getElementById('video4'))
+	const vedioDate = document.getElementById("vedioDate");
+	var carouselIndex;
+	var selectItemIndex;
+	var files;
+	
+	
     var carousel = []
-    
     var title = document.querySelector("div.title")
-
     var backVideo = document.querySelector("video.back")
     var frontVideo = document.querySelector("video.front")
     var leftVideo = document.querySelector("video.left_repeater")
     var rightVideo = document.querySelector("video.right_repeater")
-
     var next = document.querySelector("button.next")
     var previous = document.querySelector("button.previous")
-
     var setVideos = document.querySelector("button.setVideos")
 
+	
+	
+	//testok
+    let input = document.querySelector('input')
+    let textarea = document.querySelector('textarea')
+ 
+    // This event listener has been implemented to identify a
+    // Change in the input section of the html code
+    // It will be triggered when a file is chosen.
+    input.addEventListener('change', () => {
+    let files = input.files;
+ 
+    if (files.length == 0) return;
+ 
+    /* If any further modifications have to be made on the
+       Extracted text. The text can be accessed using the
+       file variable. But since this is const, it is a read
+       only variable, hence immutable. To make any changes,
+       changing const to var, here and In the reader.onload
+       function would be advisible */
+    const file = files[0];
+ 
+    let reader = new FileReader();
+ 
+    reader.onload = (e) => {
+        const file = e.target.result;
+ 
+        // This is a regular expression to identify carriage
+        // Returns and line breaks
+        const lines = file.split(/\r\n|\n/);
+        textarea.value = lines.join('\n');
+ 
+    };
+ 
+    reader.onerror = (e) => alert(e.target.error.name);
+ 
+    reader.readAsText(file);
+    });
+	
+	
+	//SelectBox	
+	// Carga la carpeta TeslaCam en el selector
+	document.getElementById("filepicker").addEventListener("change", function(event) {
+	//init
+	  files = event.target.files;
+	  carouselIndex = 0;
+	//setSelectBox
+	  setSelectBox();
+	//  loadVedioById(carouselIndex)
+	  showPlaySpeed();
+	}, false);
+
+	function setSelectBox(){
+	  //init
+	  VedioSelectBox.innerHTML = ""; // clean up the list
+	  selectItemIndex = 0;
+	  //update the content of selectBox
+	  if((files.length)%4 == 0){
+		for (let i=0; i<(files.length)/4; i++) {
+		  let item_opt = document.createElement("OPTION");
+		  // item_opt.innerHTML = files[i*4].name.split("-front.mp4")[0];
+		  item_opt.innerHTML = parseNameToDate(files[i*4].name);
+		  VedioSelectBox.appendChild(item_opt);
+		}
+	  }
+	  else {
+		alert("No hay mas archivos")
+	  }
+	}
+
+	function listVedio(){
+	  selectItemIndex = VedioSelectBox.selectedIndex;
+	  // let vedio_Index = Math.floor((selectItemIndex+1)/4);
+	  loadVedioById(selectItemIndex);
+	}
+	//display date
+	// add vedio control
+	function loadVedioById(carouselIndex){
+
+	  vedioDate.innerHTML = parseNameToDate(files[carouselIndex*4].name);
+	  // load the three vedio
+	  for(var i=0;i<4;i++){
+		let file = files[carouselIndex*4+i];
+		let obj_url =  window.URL.createObjectURL(file);
+		videoes[i].src =obj_url;
+		videoes[i].load()
+	  }
+	}
+	
+	
+	//Esto lista la carpeta seleccionada, pero falta fullpath no es muy util, al menos que sirva para carrousel
+	document.getElementById("filepicker").addEventListener("change", function(event) {
+	  let output = document.getElementById("listing");
+	  let files = event.target.files;
+
+	  for (let i=0; i<files.length; i++) {
+		let item_opt = document.createElement("listing");
+		item_opt.innerHTML = files[i].webkitRelativePath;
+		output.appendChild(item_opt);
+			
+	  };
+	}, false);
+	
+	
+	//Muestra nombre en el HTML troceado
+	function parseNameToDate(filename){
+	  let nameArry = filename.split("_");
+	  let dateArry = nameArry[0].split("-");
+	  let hourArry = nameArry[1].split("-");
+	  return dateArry[0]+"-"+dateArry[1]+"-"+dateArry[2]+" "
+							+hourArry[0]+":"+hourArry[1]+"";
+	}
+
+	
+	//Works dont touch
     setVideos.addEventListener("click", function(e){
         tmpCarousel = []
         carousel = document.querySelector("textarea[name=files]").value.split('\n');
@@ -140,6 +267,30 @@ This should load the videos and start playing them<br/>
         leftVideo.play()
         rightVideo.play()
     }
+	
+	
+	
+	function playRateSlow() {
+	    frontVideo.playbackRate=0.5;
+        backVideo.playbackRate=0.5;
+        leftVideo.playbackRate=0.5;
+        rightVideo.playbackRate=0.5;
+	}
+	
+	function playRateNormal() {
+	    frontVideo.playbackRate=1;
+        backVideo.playbackRate=1;
+        leftVideo.playbackRate=1;
+        rightVideo.playbackRate=1;
+	}
+	
+    function playRateMax() {
+	    frontVideo.playbackRate=8;
+        backVideo.playbackRate=8;
+        leftVideo.playbackRate=8;
+        rightVideo.playbackRate=8;
+	}
+
 
     function pauseVideos(){
         frontVideo.pause()
@@ -212,6 +363,7 @@ This should load the videos and start playing them<br/>
         }
     })
 
+	
+		
 </script>
-
 </html>
