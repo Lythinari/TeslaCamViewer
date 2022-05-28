@@ -106,21 +106,7 @@ Supposedly works in all browsers.<br/>
         }
         carousel = tmpCarousel
         loadVideos(0)
-    })
-    
-    document.querySelector("input[type=file][id=fileBrowser]").addEventListener("change", function(e){
-        tmpCarousel = []
-        var files = e.target.files
-        for (let i=0; i<files.length; i++) {
-            var file = files[i]
-            var entry = file.webkitRelativePath
-            if(entry.endsWith("-back.mp4")){
-                tmpCarousel.push(entry.replace(/-back.mp4$/gm,''))
-            }
-        }
-        carousel = tmpCarousel
-        loadVideos(0)
-    })    
+    })   
 
     function loadVideos(index){
         title.innerHTML = carousel[index]
