@@ -31,7 +31,10 @@
         </style>
     </head>
     <body>
-		<input type="file"><button class="setVideos">Set Videos</button><textarea name="files" cols="60" rows="1" placeholder="Select list.txt and click Set videos for load"></textarea>
+        <div>
+            Select Tesla Cam Directory(Must be in same directory as Index.html): <input type="file" id="fileBrowser" accept="video/mp4" webkitdirectory multiple/>
+        </div>
+<!-- 		<input type="file"><button class="setVideos">Set Videos</button><textarea name="files" cols="60" rows="1" placeholder="Select list.txt and click Set videos for load"></textarea> -->
 		<button onclick="playRateSlow()">0.5x</button>
 		<button onclick="playRateNormal()">1x</button>
 		<button onclick="playRateMax()">8x</button>
@@ -76,27 +79,6 @@ Root Folder<br/>
 &nbsp;&nbsp;&nbsp;|- Sentry Videos<br/>
 &nbsp;&nbsp;&nbsp;|- ...<br/>
 </code><br/>
-
-Openning the <code>index.html</code> file in a browser should be able to show this page<br/>
-
-<hr/>
-<strong>Command to run the file list</strong><br/>
-On *nix terminal running the following command on the TeslaCam folder<br/><br/>
-<code>find ./TeslaCam -print | sort -n | grep back.mp4</code><br/><br/>
-On windows this command will do the same thing in its directory<br/>
-<code>dir /a-D /S /B /ON *-back.mp4</code><br/><br/>
-Copy the output, the dataset should look like this(or similar to the following):<br/>
-<code>
-./TeslaCam/SavedClips/2022-04-11_19-23-07/2022-04-11_19-12-27-back.mp4<br/>
-./TeslaCam/SavedClips/2022-04-11_19-23-07/2022-04-11_19-13-27-back.mp4<br/>
-./TeslaCam/SavedClips/2022-04-11_19-23-07/2022-04-11_19-14-27-back.mp4<br/>
-</code><br/>
-Note:<br/>
-Only the <strong>back</strong> videos are listed, this is on purpose.<br/>
-<hr/>
-Copy the output from the command into the textarea and push <strong>Set Videos</strong>
-This should load the videos and start playing them<br/>
-
 
 </div>
 
@@ -236,19 +218,16 @@ This should load the videos and start playing them<br/>
 
 	
 	//Works dont touch
-    setVideos.addEventListener("click", function(e){
+    document.querySelector("input[type=file][id=fileBrowser]").addEventListener("change", function(e){
         tmpCarousel = []
-        carousel = document.querySelector("textarea[name=files]").value.split('\n');
-        carousel.forEach(entry => {
-            if(entry.length == 0) {
-                return
-            }
+        var files = e.target.files
+        for (let i=0; i<files.length; i++) {
+            var file = files[i]
+            var entry = file.webkitRelativePath
             if(entry.endsWith("-back.mp4")){
                 tmpCarousel.push(entry.replace(/-back.mp4$/gm,''))
-            } else {
-                tmpCarousel.push(entry)
             }
-        })
+        }
         carousel = tmpCarousel
         loadVideos(0)
     })
