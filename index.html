@@ -44,11 +44,9 @@
             </tr>
             <tr><td colspan="3"><video class="back" src="" controls controlsList="play pause"></video></td></tr>
             <tr><td><button class="previous">Previous</button></td><td><input checked type="checkbox" name="autoplay"/>Autoplay</td><td><button class="next">Next</button></td></tr>
-        </table>        
+        </table>
         <div>
-            <h3>Input Video List Here:</h3>
-            <textarea name="files" id="" cols="30" rows="10"></textarea>
-            <button class="setVideos">Set Videos</button>
+        Select Tesla Cam Directory(Must be in same directory as Index.html): <input type="file" id="fileBrowser" accept="video/mp4" webkitdirectory multiple/>
         </div>
     </body>
 
@@ -75,22 +73,11 @@ Openning the <code>index.html</code> file in a browser should be able to show th
 
 <hr/>
 <strong>Command to run the file list</strong><br/>
-On *nix terminal running the following command on the TeslaCam folder<br/><br/>
-<code>find ./TeslaCam -print | sort -n | grep back.mp4</code><br/><br/>
-On windows this command will do the same thing in its directory<br/>
-<code>dir /a-D /S /B /ON *-back.mp4</code><br/><br/>
-Copy the output, the dataset should look like this(or similar to the following):<br/>
-<code>
-./TeslaCam/SavedClips/2022-04-11_19-23-07/2022-04-11_19-12-27-back.mp4<br/>
-./TeslaCam/SavedClips/2022-04-11_19-23-07/2022-04-11_19-13-27-back.mp4<br/>
-./TeslaCam/SavedClips/2022-04-11_19-23-07/2022-04-11_19-14-27-back.mp4<br/>
-</code><br/>
-Note:<br/>
-Only the <strong>back</strong> videos are listed, this is on purpose.<br/>
-<hr/>
-Copy the output from the command into the textarea and push <strong>Set Videos</strong>
-This should load the videos and start playing them<br/>
-
+Commands are now obsolete!
+    
+    <h3> Browser Support</h3>
+Supposedly works in all browsers.<br/>
+    https://developer.mozilla.org/en-US/docs/Web/API/HTMLInputElement/webkitdirectory<br/>
 
 </div>
 
@@ -107,24 +94,33 @@ This should load the videos and start playing them<br/>
     var next = document.querySelector("button.next")
     var previous = document.querySelector("button.previous")
 
-    var setVideos = document.querySelector("button.setVideos")
-
-    setVideos.addEventListener("click", function(e){
+    document.querySelector("input[type=file][id=fileBrowser]").addEventListener("change", function(e){
         tmpCarousel = []
-        carousel = document.querySelector("textarea[name=files]").value.split('\n');
-        carousel.forEach(entry => {
-            if(entry.length == 0) {
-                return
-            }
+        var files = e.target.files
+        for (let i=0; i<files.length; i++) {
+            var file = files[i]
+            var entry = file.webkitRelativePath
             if(entry.endsWith("-back.mp4")){
                 tmpCarousel.push(entry.replace(/-back.mp4$/gm,''))
-            } else {
-                tmpCarousel.push(entry)
             }
-        })
+        }
         carousel = tmpCarousel
         loadVideos(0)
     })
+    
+    document.querySelector("input[type=file][id=fileBrowser]").addEventListener("change", function(e){
+        tmpCarousel = []
+        var files = e.target.files
+        for (let i=0; i<files.length; i++) {
+            var file = files[i]
+            var entry = file.webkitRelativePath
+            if(entry.endsWith("-back.mp4")){
+                tmpCarousel.push(entry.replace(/-back.mp4$/gm,''))
+            }
+        }
+        carousel = tmpCarousel
+        loadVideos(0)
+    })    
 
     function loadVideos(index){
         title.innerHTML = carousel[index]
