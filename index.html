@@ -28,22 +28,23 @@
             div.readme {
                 padding: 5px;
             }
+
         </style>
     </head>
     <body>
         <div>
-            Select Tesla Cam Directory(Must be in same directory as Index.html): <input type="file" id="fileBrowser" accept="video/mp4" webkitdirectory multiple/>
+            <strong>Select TeslaCam Directory</strong>(Must be in same directory as Index.html):<br/> <input type="file" id="fileBrowser" accept="video/mp4" webkitdirectory multiple/>
         </div>
-<!-- 		<input type="file"><button class="setVideos">Set Videos</button><textarea name="files" cols="60" rows="1" placeholder="Select list.txt and click Set videos for load"></textarea> -->
-		<button onclick="playRateSlow()">0.5x</button>
-		<button onclick="playRateNormal()">1x</button>
-		<button onclick="playRateMax()">8x</button>
-		<input checked type="checkbox" name="autoplay"/>Autoplay
-		<button class="previous"><<<<<</button>
-		<button class="next">>>>>></button>
-		
-	    <br/>
-		<div class="title"><span>No Videos</span></div>
+        <div>
+            <button onclick="playRateSlow()">0.5x</button>
+            <button onclick="playRateNormal()">1x</button>
+            <button onclick="playRateMax()">8x</button>
+            <input checked type="checkbox" name="autoplay"/>Autoplay
+            <button class="previous"><<<<<</button>
+            <button class="next">>>>>></button>
+        </div>
+
+		<div class="title"><span>No Videos Loaded</span></div>
 		
         <table>
 			<tr>
@@ -57,12 +58,11 @@
 			</tr>
 		</table> 
 		
-		    
-	    <input type="file" id="filepicker" accept="video/mp4" webkitdirectory multiple/>
-	    <select id="vedioSelect" onchange="listVedio()"></select>
-	    
-		<div><ul id="listing"></ul></div>
-		
+		<div class="test">
+            <input type="file" id="filepicker" accept="video/mp4" webkitdirectory multiple/>
+            <select id="vedioSelect" onchange="listVedio()"></select>       
+            <div><ul id="listing"></ul></div>
+        </div>
 	</body>
 
 
@@ -92,6 +92,7 @@ Root Folder<br/>
 	var selectItemIndex;
 	var files;
 	
+    var playbackRate = 1
 	
     var carousel = []
     var title = document.querySelector("div.title")
@@ -107,7 +108,7 @@ Root Folder<br/>
 	
 	//testok
     let input = document.querySelector('input')
-    let textarea = document.querySelector('textarea')
+    // let textarea = document.querySelector('textarea')
  
     // This event listener has been implemented to identify a
     // Change in the input section of the html code
@@ -133,7 +134,7 @@ Root Folder<br/>
         // This is a regular expression to identify carriage
         // Returns and line breaks
         const lines = file.split(/\r\n|\n/);
-        textarea.value = lines.join('\n');
+        // textarea.value = lines.join('\n');
  
     };
  
@@ -212,25 +213,44 @@ Root Folder<br/>
 	  let nameArry = filename.split("_");
 	  let dateArry = nameArry[0].split("-");
 	  let hourArry = nameArry[1].split("-");
-	  return dateArry[0]+"-"+dateArry[1]+"-"+dateArry[2]+" "
-							+hourArry[0]+":"+hourArry[1]+"";
+	  return dateArry[0]+"-"+dateArry[1]+"-"+dateArry[2]+"T"
+							+hourArry[0]+":"+hourArry[1]+":"+hourArry[2];
 	}
 
 	
 	//Works dont touch
     document.querySelector("input[type=file][id=fileBrowser]").addEventListener("change", function(e){
-        tmpCarousel = []
         var files = e.target.files
+        tmpFiles = []
+        
+        //get "back" files to sort from webkitRelativePath
         for (let i=0; i<files.length; i++) {
             var file = files[i]
             var entry = file.webkitRelativePath
             if(entry.endsWith("-back.mp4")){
-                tmpCarousel.push(entry.replace(/-back.mp4$/gm,''))
+                tmpFiles.push(file)
             }
         }
-        carousel = tmpCarousel
+        
+        //Sort the files in ascending date
+        tmpFiles.sort(function(a,b){
+            var firstDate = Date.parse(parseNameToDate(a.name))
+            var secondDate = Date.parse(parseNameToDate(b.name))
+            return firstDate - secondDate
+        })
+        
+        setCarousel(tmpFiles)
         loadVideos(0)
     })
+    
+    function setCarousel(files){
+        //trim the video link for the players
+        tmpCarousel = []
+        files.forEach(file => {
+            tmpCarousel.push(file.webkitRelativePath.replace(/-back.mp4$/gm,''))
+        })
+        carousel = tmpCarousel
+    }
 
     function loadVideos(index){
         title.innerHTML = carousel[index]
@@ -245,29 +265,27 @@ Root Folder<br/>
         backVideo.play()
         leftVideo.play()
         rightVideo.play()
+
+        frontVideo.playbackRate=playbackRate;
+        backVideo.playbackRate=playbackRate;
+        leftVideo.playbackRate=playbackRate;
+        rightVideo.playbackRate=playbackRate;
     }
 	
 	
-	
 	function playRateSlow() {
-	    frontVideo.playbackRate=0.5;
-        backVideo.playbackRate=0.5;
-        leftVideo.playbackRate=0.5;
-        rightVideo.playbackRate=0.5;
+	    playbackRate = 0.5
+        playVideos()
 	}
 	
 	function playRateNormal() {
-	    frontVideo.playbackRate=1;
-        backVideo.playbackRate=1;
-        leftVideo.playbackRate=1;
-        rightVideo.playbackRate=1;
+	    playbackRate = 1
+        playVideos()
 	}
 	
     function playRateMax() {
-	    frontVideo.playbackRate=8;
-        backVideo.playbackRate=8;
-        leftVideo.playbackRate=8;
-        rightVideo.playbackRate=8;
+        playbackRate = 8
+        playVideos()
 	}
 
 
