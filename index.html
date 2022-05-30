@@ -35,7 +35,7 @@
         <div>
             <strong>Select TeslaCam Directory</strong>(Must be in same directory as Index.html):<br/> <input type="file" id="fileBrowser" accept="video/mp4" webkitdirectory multiple/>
         </div>
-        <div>
+        <div class="global-controls">
             <button onclick="playRateSlow()">0.5x</button>
             <button onclick="playRateNormal()">1x</button>
             <button onclick="playRateMax()">8x</button>
@@ -58,11 +58,6 @@
 			</tr>
 		</table> 
 		
-		<div class="test">
-            <input type="file" id="filepicker" accept="video/mp4" webkitdirectory multiple/>
-            <select id="vedioSelect" onchange="listVedio()"></select>       
-            <div><ul id="listing"></ul></div>
-        </div>
 	</body>
 
 
@@ -106,158 +101,209 @@ Root Folder<br/>
 
 	
 	
-	//testok
-    let input = document.querySelector('input')
-    // let textarea = document.querySelector('textarea')
+	// //testok
+    // let input = document.querySelector('input')
+    // // let textarea = document.querySelector('textarea')
  
-    // This event listener has been implemented to identify a
-    // Change in the input section of the html code
-    // It will be triggered when a file is chosen.
-    input.addEventListener('change', () => {
-    let files = input.files;
+    // // This event listener has been implemented to identify a
+    // // Change in the input section of the html code
+    // // It will be triggered when a file is chosen.
+    // input.addEventListener('change', () => {
+    // let files = input.files;
  
-    if (files.length == 0) return;
+    // if (files.length == 0) return;
  
-    /* If any further modifications have to be made on the
-       Extracted text. The text can be accessed using the
-       file variable. But since this is const, it is a read
-       only variable, hence immutable. To make any changes,
-       changing const to var, here and In the reader.onload
-       function would be advisible */
-    const file = files[0];
+    // /* If any further modifications have to be made on the
+    //    Extracted text. The text can be accessed using the
+    //    file variable. But since this is const, it is a read
+    //    only variable, hence immutable. To make any changes,
+    //    changing const to var, here and In the reader.onload
+    //    function would be advisible */
+    // const file = files[0];
  
-    let reader = new FileReader();
+    // let reader = new FileReader();
  
-    reader.onload = (e) => {
-        const file = e.target.result;
+    // reader.onload = (e) => {
+    //     const file = e.target.result;
  
-        // This is a regular expression to identify carriage
-        // Returns and line breaks
-        const lines = file.split(/\r\n|\n/);
-        // textarea.value = lines.join('\n');
+    //     // This is a regular expression to identify carriage
+    //     // Returns and line breaks
+    //     const lines = file.split(/\r\n|\n/);
+    //     // textarea.value = lines.join('\n');
  
-    };
+    // };
  
-    reader.onerror = (e) => alert(e.target.error.name);
+    // reader.onerror = (e) => alert(e.target.error.name);
  
-    reader.readAsText(file);
-    });
+    // reader.readAsText(file);
+    // });
 	
 	
-	//SelectBox	
-	// Carga la carpeta TeslaCam en el selector
-	document.getElementById("filepicker").addEventListener("change", function(event) {
-	//init
-	  files = event.target.files;
-	  carouselIndex = 0;
-	//setSelectBox
-	  setSelectBox();
-	//  loadVedioById(carouselIndex)
-	  showPlaySpeed();
-	}, false);
+	// //SelectBox	
+	// // Carga la carpeta TeslaCam en el selector
+	// document.getElementById("filepicker").addEventListener("change", function(event) {
+	// //init
+	//   files = event.target.files;
+	//   carouselIndex = 0;
+	// //setSelectBox
+	//   setSelectBox();
+	// //  loadVedioById(carouselIndex)
+	//   showPlaySpeed();
+	// }, false);
 
-	function setSelectBox(){
-	  //init
-	  VedioSelectBox.innerHTML = ""; // clean up the list
-	  selectItemIndex = 0;
-	  //update the content of selectBox
-	  if((files.length)%4 == 0){
-		for (let i=0; i<(files.length)/4; i++) {
-		  let item_opt = document.createElement("OPTION");
-		  // item_opt.innerHTML = files[i*4].name.split("-front.mp4")[0];
-		  item_opt.innerHTML = parseNameToDate(files[i*4].name);
-		  VedioSelectBox.appendChild(item_opt);
-		}
-	  }
-	  else {
-		alert("No hay mas archivos")
-	  }
-	}
+	// function setSelectBox(){
+	//   //init
+	//   VedioSelectBox.innerHTML = ""; // clean up the list
+	//   selectItemIndex = 0;
+	//   //update the content of selectBox
+	//   if((files.length)%4 == 0){
+	// 	for (let i=0; i<(files.length)/4; i++) {
+	// 	  let item_opt = document.createElement("OPTION");
+	// 	  // item_opt.innerHTML = files[i*4].name.split("-front.mp4")[0];
+	// 	  item_opt.innerHTML = parseNameToDate(files[i*4].name);
+	// 	  VedioSelectBox.appendChild(item_opt);
+	// 	}
+	//   }
+	//   else {
+	// 	alert("No hay mas archivos")
+	//   }
+	// }
 
-	function listVedio(){
-	  selectItemIndex = VedioSelectBox.selectedIndex;
-	  // let vedio_Index = Math.floor((selectItemIndex+1)/4);
-	  loadVedioById(selectItemIndex);
-	}
-	//display date
-	// add vedio control
-	function loadVedioById(carouselIndex){
+	// function listVedio(){
+	//   selectItemIndex = VedioSelectBox.selectedIndex;
+	//   // let vedio_Index = Math.floor((selectItemIndex+1)/4);
+	//   loadVedioById(selectItemIndex);
+	// }
+	// //display date
+	// // add vedio control
+	// function loadVedioById(carouselIndex){
 
-	  vedioDate.innerHTML = parseNameToDate(files[carouselIndex*4].name);
-	  // load the three vedio
-	  for(var i=0;i<4;i++){
-		let file = files[carouselIndex*4+i];
-		let obj_url =  window.URL.createObjectURL(file);
-		videoes[i].src =obj_url;
-		videoes[i].load()
-	  }
-	}
+	//   vedioDate.innerHTML = parseNameToDate(files[carouselIndex*4].name);
+	//   // load the three vedio
+	//   for(var i=0;i<4;i++){
+	// 	let file = files[carouselIndex*4+i];
+	// 	let obj_url =  window.URL.createObjectURL(file);
+	// 	videoes[i].src =obj_url;
+	// 	videoes[i].load()
+	//   }
+	// }
 	
 	
-	//Esto lista la carpeta seleccionada, pero falta fullpath no es muy util, al menos que sirva para carrousel
-	document.getElementById("filepicker").addEventListener("change", function(event) {
-	  let output = document.getElementById("listing");
-	  let files = event.target.files;
+	// //Esto lista la carpeta seleccionada, pero falta fullpath no es muy util, al menos que sirva para carrousel
+	// document.getElementById("filepicker").addEventListener("change", function(event) {
+	//   let output = document.getElementById("listing");
+	//   let files = event.target.files;
 
-	  for (let i=0; i<files.length; i++) {
-		let item_opt = document.createElement("listing");
-		item_opt.innerHTML = files[i].webkitRelativePath;
-		output.appendChild(item_opt);
+	//   for (let i=0; i<files.length; i++) {
+	// 	let item_opt = document.createElement("listing");
+	// 	item_opt.innerHTML = files[i].webkitRelativePath;
+	// 	output.appendChild(item_opt);
 			
-	  };
-	}, false);
+	//   };
+	// }, false);
 	
 	
-	//Muestra nombre en el HTML troceado
-	function parseNameToDate(filename){
-	  let nameArry = filename.split("_");
-	  let dateArry = nameArry[0].split("-");
-	  let hourArry = nameArry[1].split("-");
-	  return dateArry[0]+"-"+dateArry[1]+"-"+dateArry[2]+"T"
-							+hourArry[0]+":"+hourArry[1]+":"+hourArry[2];
-	}
+	// //Muestra nombre en el HTML troceado
+	// function parseNameToDate(filename){
+	//   let nameArry = filename.split("_");
+	//   let dateArry = nameArry[0].split("-");
+	//   let hourArry = nameArry[1].split("-");
+	//   return dateArry[0]+"-"+dateArry[1]+"-"+dateArry[2]+"T"
+	// 						+hourArry[0]+":"+hourArry[1]+":"+hourArry[2];
+	// }
 
+
+    class TeslaCamFile {
+        separator = "/" //default separator(necessary? not sure)
+        clipType = "SentryClip" //Recorded/SentryClip...
+        triggerDate = "" // folder name doubles as the date the video clip was triggered
+        clipDate = "" // transformed clip name
+        clipName = "" // the clip name
+        file = "" // webkit file incase we need other data
+
+        constructor(file){
+            this.clipName = file.name
+            this.clipDate = Date.parse(this.parseToDate(file.name))
+            this.getDirectories(file)
+
+            //just in case we need it for the future
+            this.file = file
+        }
+
+        getDirectories(file){
+            this.separator = file.webkitRelativePath.replace(file.name, "").substr(-1)
+            var directoryParts = file.webkitRelativePath.split(this.separator)
+            this.clipType = directoryParts[1]
+            this.triggerDate = directoryParts[2]
+        }
+
+        //Muestra nombre en el HTML troceado
+        parseToDate(filename){
+            let nameArry = filename.split("_");
+            let dateArry = nameArry[0].split("-");
+            let hourArry = nameArry[1].split("-");
+            return dateArry[0]+"-"+dateArry[1]+"-"+dateArry[2]+"T"+hourArry[0]+":"+hourArry[1]+":"+hourArry[2]; // format to ISO(sorta) - no TZ so defaults to local
+        }
+
+        build(){
+            var filePath = "TeslaCam" + this.separator + this.clipType
+            if(this.clipType != "RecentClips"){
+                filePath += this.separator + this.triggerDate
+            }
+
+            return filePath + this.separator + this.clipName.replace(/-back.mp4$/gm,'')
+        }
+    }
 	
 	//Works dont touch
     document.querySelector("input[type=file][id=fileBrowser]").addEventListener("change", function(e){
         var files = e.target.files
-        tmpFiles = []
-        
+        tcFiles = []
         //get "back" files to sort from webkitRelativePath
         for (let i=0; i<files.length; i++) {
             var file = files[i]
-            var entry = file.webkitRelativePath
-            if(entry.endsWith("-back.mp4")){
-                tmpFiles.push(file)
+            if(file.webkitRelativePath.endsWith("-back.mp4")){
+                var tcFile = new TeslaCamFile(file)
+                tcFiles.push(tcFile)
             }
         }
         
         //Sort the files in ascending date
-        tmpFiles.sort(function(a,b){
-            var firstDate = Date.parse(parseNameToDate(a.name))
-            var secondDate = Date.parse(parseNameToDate(b.name))
+        tcFiles.sort(function(a,b){
+            var firstDate = a.clipDate
+            var secondDate = b.clipDate
             return firstDate - secondDate
         })
-        
-        setCarousel(tmpFiles)
+
+        // Create dropdown for clips
+        tmpDir = [] //track dir's added
+        dropDown = document.createElement("select")
+        tcFiles.forEach((tcFile, index) => {
+            dir = tcFile.clipType+tcFile.separator+tcFile.clipName.replace(/-back.mp4$/gm,'')
+            if (!tmpDir.includes(dir)) {
+                tmpDir.push(dir)
+                var option = document.createElement("option")
+                option.innerText = dir
+                option.value = index // assume that the index is going to be the first clip for each new date.
+                dropDown.appendChild(option)
+            }
+        })
+        dropDown.addEventListener("change", function(e){
+            carouselIndex = parseInt(e.target.options[e.target.selectedIndex].value)
+            loadVideos(carouselIndex)
+        })
+        document.querySelector("div.global-controls").appendChild(dropDown)
+
+        carousel = tcFiles
         loadVideos(0)
     })
-    
-    function setCarousel(files){
-        //trim the video link for the players
-        tmpCarousel = []
-        files.forEach(file => {
-            tmpCarousel.push(file.webkitRelativePath.replace(/-back.mp4$/gm,''))
-        })
-        carousel = tmpCarousel
-    }
 
     function loadVideos(index){
-        title.innerHTML = carousel[index]
-        backVideo.src = carousel[index]+"-back.mp4"
-        frontVideo.src = carousel[index]+"-front.mp4"
-        leftVideo.src = carousel[index]+"-left_repeater.mp4"
-        rightVideo.src = carousel[index]+"-right_repeater.mp4"
+        title.innerHTML = carousel[index].build()
+        backVideo.src = carousel[index].build()+"-back.mp4"
+        frontVideo.src = carousel[index].build()+"-front.mp4"
+        leftVideo.src = carousel[index].build()+"-left_repeater.mp4"
+        rightVideo.src = carousel[index].build()+"-right_repeater.mp4"
     }
 
     function playVideos(){
