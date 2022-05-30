@@ -42,6 +42,7 @@
             <input checked type="checkbox" name="autoplay"/>Autoplay
             <button class="previous"><<<<<</button>
             <button class="next">>>>>></button>
+			<button onclick="playPause()">PLAY/PAUSA</button>
         </div>
 
 		<div class="title"><span>No Videos Loaded</span></div>
@@ -78,7 +79,6 @@ Root Folder<br/>
 </div>
 
 <script>
-    //SelectBox
 	
     const VedioSelectBox = document.getElementById("vedioSelect");
 	const videoes = new Array(document.getElementById('video1'),document.getElementById('video2'),document.getElementById('video3'),document.getElementById('video4'))
@@ -88,6 +88,7 @@ Root Folder<br/>
 	var files;
 	
     var playbackRate = 1
+	var playPauseFlag = true;
 	
     var carousel = []
     var title = document.querySelector("div.title")
@@ -98,119 +99,6 @@ Root Folder<br/>
     var next = document.querySelector("button.next")
     var previous = document.querySelector("button.previous")
     var setVideos = document.querySelector("button.setVideos")
-
-	
-	
-	// //testok
-    // let input = document.querySelector('input')
-    // // let textarea = document.querySelector('textarea')
- 
-    // // This event listener has been implemented to identify a
-    // // Change in the input section of the html code
-    // // It will be triggered when a file is chosen.
-    // input.addEventListener('change', () => {
-    // let files = input.files;
- 
-    // if (files.length == 0) return;
- 
-    // /* If any further modifications have to be made on the
-    //    Extracted text. The text can be accessed using the
-    //    file variable. But since this is const, it is a read
-    //    only variable, hence immutable. To make any changes,
-    //    changing const to var, here and In the reader.onload
-    //    function would be advisible */
-    // const file = files[0];
- 
-    // let reader = new FileReader();
- 
-    // reader.onload = (e) => {
-    //     const file = e.target.result;
- 
-    //     // This is a regular expression to identify carriage
-    //     // Returns and line breaks
-    //     const lines = file.split(/\r\n|\n/);
-    //     // textarea.value = lines.join('\n');
- 
-    // };
- 
-    // reader.onerror = (e) => alert(e.target.error.name);
- 
-    // reader.readAsText(file);
-    // });
-	
-	
-	// //SelectBox	
-	// // Carga la carpeta TeslaCam en el selector
-	// document.getElementById("filepicker").addEventListener("change", function(event) {
-	// //init
-	//   files = event.target.files;
-	//   carouselIndex = 0;
-	// //setSelectBox
-	//   setSelectBox();
-	// //  loadVedioById(carouselIndex)
-	//   showPlaySpeed();
-	// }, false);
-
-	// function setSelectBox(){
-	//   //init
-	//   VedioSelectBox.innerHTML = ""; // clean up the list
-	//   selectItemIndex = 0;
-	//   //update the content of selectBox
-	//   if((files.length)%4 == 0){
-	// 	for (let i=0; i<(files.length)/4; i++) {
-	// 	  let item_opt = document.createElement("OPTION");
-	// 	  // item_opt.innerHTML = files[i*4].name.split("-front.mp4")[0];
-	// 	  item_opt.innerHTML = parseNameToDate(files[i*4].name);
-	// 	  VedioSelectBox.appendChild(item_opt);
-	// 	}
-	//   }
-	//   else {
-	// 	alert("No hay mas archivos")
-	//   }
-	// }
-
-	// function listVedio(){
-	//   selectItemIndex = VedioSelectBox.selectedIndex;
-	//   // let vedio_Index = Math.floor((selectItemIndex+1)/4);
-	//   loadVedioById(selectItemIndex);
-	// }
-	// //display date
-	// // add vedio control
-	// function loadVedioById(carouselIndex){
-
-	//   vedioDate.innerHTML = parseNameToDate(files[carouselIndex*4].name);
-	//   // load the three vedio
-	//   for(var i=0;i<4;i++){
-	// 	let file = files[carouselIndex*4+i];
-	// 	let obj_url =  window.URL.createObjectURL(file);
-	// 	videoes[i].src =obj_url;
-	// 	videoes[i].load()
-	//   }
-	// }
-	
-	
-	// //Esto lista la carpeta seleccionada, pero falta fullpath no es muy util, al menos que sirva para carrousel
-	// document.getElementById("filepicker").addEventListener("change", function(event) {
-	//   let output = document.getElementById("listing");
-	//   let files = event.target.files;
-
-	//   for (let i=0; i<files.length; i++) {
-	// 	let item_opt = document.createElement("listing");
-	// 	item_opt.innerHTML = files[i].webkitRelativePath;
-	// 	output.appendChild(item_opt);
-			
-	//   };
-	// }, false);
-	
-	
-	// //Muestra nombre en el HTML troceado
-	// function parseNameToDate(filename){
-	//   let nameArry = filename.split("_");
-	//   let dateArry = nameArry[0].split("-");
-	//   let hourArry = nameArry[1].split("-");
-	//   return dateArry[0]+"-"+dateArry[1]+"-"+dateArry[2]+"T"
-	// 						+hourArry[0]+":"+hourArry[1]+":"+hourArry[2];
-	// }
 
 
     class TeslaCamFile {
@@ -237,12 +125,12 @@ Root Folder<br/>
             this.triggerDate = directoryParts[2]
         }
 
-        //Muestra nombre en el HTML troceado
+        //format to ISO(sorta) - no TZ so defaults to local
         parseToDate(filename){
             let nameArry = filename.split("_");
             let dateArry = nameArry[0].split("-");
             let hourArry = nameArry[1].split("-");
-            return dateArry[0]+"-"+dateArry[1]+"-"+dateArry[2]+"T"+hourArry[0]+":"+hourArry[1]+":"+hourArry[2]; // format to ISO(sorta) - no TZ so defaults to local
+            return dateArry[0]+"-"+dateArry[1]+"-"+dateArry[2]+"T"+hourArry[0]+":"+hourArry[1]+":"+hourArry[2]; 
         }
 
         build(){
@@ -255,7 +143,7 @@ Root Folder<br/>
         }
     }
 	
-	//Works dont touch
+	//Input file
     document.querySelector("input[type=file][id=fileBrowser]").addEventListener("change", function(e){
         var files = e.target.files
         tcFiles = []
@@ -322,7 +210,6 @@ Root Folder<br/>
         rightVideo.playbackRate=playbackRate;
     }
 	
-	
 	function playRateSlow() {
 	    playbackRate = 0.5
         playVideos()
@@ -338,7 +225,6 @@ Root Folder<br/>
         playVideos()
 	}
 
-
     function pauseVideos(){
         frontVideo.pause()
         backVideo.pause()
@@ -346,6 +232,17 @@ Root Folder<br/>
         rightVideo.pause()
     }
 
+	function playPause() {
+	  if (playPauseFlag!=true){
+		playVideos()
+		playPauseFlag = true;
+		}
+	  else{
+		pauseVideos()
+		playPauseFlag = false;
+		}
+ 	}
+	
     let videos = document.querySelectorAll("video");
     videos.forEach(video => {
         video.addEventListener("play", function(e){
@@ -409,8 +306,6 @@ Root Folder<br/>
             loadVideos(carouselIndex)
         }
     })
-
 	
-		
 </script>
 </html>
