@@ -279,7 +279,11 @@ Root Folder<br/>
         tmpDir = [] //track dir's added
         dropDown = document.createElement("select")
         tcFiles.forEach((tcFile, index) => {
-            dir = tcFile.clipType+tcFile.separator+tcFile.clipName.replace(/-back.mp4$/gm,'')
+            dir = tcFile.clipType+tcFile.separator+tcFile.triggerDate
+            if (tcFile.clipType == "RecentClips") {
+                dir = tcFile.clipType+tcFile.separator+tcFile.clipName.replace(/-back.mp4$/gm,'')
+            }
+            
             if (!tmpDir.includes(dir)) {
                 tmpDir.push(dir)
                 var option = document.createElement("option")
