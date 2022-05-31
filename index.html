@@ -36,9 +36,11 @@
             <strong>Select TeslaCam Directory</strong>(Must be in same directory as Index.html):<br/> <input type="file" id="fileBrowser" accept="video/mp4" webkitdirectory multiple/>
         </div>
         <div class="global-controls">
-            <button onclick="playRateSlow()">0.5x</button>
-            <button onclick="playRateNormal()">1x</button>
-            <button onclick="playRateMax()">8x</button>
+            <button onclick="playRate(0.5)">0.5x</button>
+            <button onclick="playRate(1)">1x</button>
+            <button onclick="playRate(2)">2x</button>
+            <button onclick="playRate(3)">3x</button>
+            <button onclick="playRate(8)">8x</button>
             <input checked type="checkbox" name="autoplay"/>Autoplay
             <button class="previous"><<<<<</button>
             <button class="next">>>>>></button>
@@ -79,10 +81,6 @@ Root Folder<br/>
 </div>
 
 <script>
-	
-    const VedioSelectBox = document.getElementById("vedioSelect");
-	const videoes = new Array(document.getElementById('video1'),document.getElementById('video2'),document.getElementById('video3'),document.getElementById('video4'))
-	const vedioDate = document.getElementById("vedioDate");
 	var carouselIndex;
 	var selectItemIndex;
 	var files;
@@ -165,7 +163,11 @@ Root Folder<br/>
 
         // Create dropdown for clips
         tmpDir = [] //track dir's added
+        if(document.querySelector("select.date-select") != undefined) {
+            document.querySelector("select.date-select").remove()
+        }
         dropDown = document.createElement("select")
+        dropDown.classList.add("date-select")
         tcFiles.forEach((tcFile, index) => {
             dir = tcFile.clipType+tcFile.separator+tcFile.triggerDate
             if (tcFile.clipType == "RecentClips") {
@@ -210,20 +212,10 @@ Root Folder<br/>
         rightVideo.playbackRate=playbackRate;
     }
 	
-	function playRateSlow() {
-	    playbackRate = 0.5
+    function playRate(rate){
+        playbackRate = rate
         playVideos()
-	}
-	
-	function playRateNormal() {
-	    playbackRate = 1
-        playVideos()
-	}
-	
-    function playRateMax() {
-        playbackRate = 8
-        playVideos()
-	}
+    }
 
     function pauseVideos(){
         frontVideo.pause()
