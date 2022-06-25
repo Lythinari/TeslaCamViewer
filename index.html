@@ -6,13 +6,24 @@
                 align-content: center;
             }
             div.title {
-                font-size: 15px;
+                font-size: 25px;
+                text-align: center;
             }
             div.title>span {
                 color: red;
             }
-            div>div {
+            div>div.global-controls{
                 display: inline-block;
+            }
+            .play_speed {
+                display: inline-block;
+                padding: 5px;
+                text-align: center;
+            }
+            .controls {
+                display: inline-block;
+                padding: 5px;
+                text-align: center;
             }
             video {
                 width: 600px;
@@ -28,57 +39,75 @@
             div.readme {
                 padding: 5px;
             }
-
+            code {
+                background:lightgrey
+            }
         </style>
     </head>
     <body>
         <div>
-            <strong>Select TeslaCam Directory</strong>(Must be in same directory as Index.html):<br/> <input type="file" id="fileBrowser" accept="video/mp4" webkitdirectory multiple/>
+            <div>
+                <strong>Select TeslaCam Directory</strong>(Must be in same directory as Index.html):<br/> 
+                <input type="file" id="fileBrowser" accept="video/mp4" webkitdirectory multiple/>
+            </div>
+            <div>   
+                Browse Loaded Clips: <select class="date-select"><option>- - - - - -</option></select>
+            </div>
         </div>
+        
         <div class="global-controls">
-            <button onclick="playRate(0.5)">0.5x</button>
-            <button onclick="playRate(1)">1x</button>
-            <button onclick="playRate(2)">2x</button>
-            <button onclick="playRate(3)">3x</button>
-            <button onclick="playRate(8)">8x</button>
-            <input checked type="checkbox" name="autoplay"/>Autoplay
-            <button class="previous"><<<<<</button>
-            <button class="next">>>>>></button>
-			<button onclick="playPause()">PLAY/PAUSA</button>
+            <div class="play_speed">
+                <span>Play Speed</span><br/>
+                <button onclick="playRate(0.5)">0.5x</button>
+                <button onclick="playRate(1)">1x</button>
+                <button onclick="playRate(2)">2x</button>
+                <button onclick="playRate(3)">3x</button>
+                <button onclick="playRate(8)">8x</button>
+            </div>
+            <div class="controls">
+                <span>General Controls</span><br/>
+                <button class="previous">&lt;&lt;PREV&lt;&lt;</button>
+                <button class="skip" onclick="skipTo(-5)">-5</button>
+                <button class="skip" onclick="skipTo(-3)">-3</button>
+                <button onclick="playPause()">PLAY/PAUSE</button>
+                <button class="skip" onclick="skipTo(3)">3</button>
+                <button class="skip" onclick="skipTo(5)">5</button>
+                <button class="next">&gt;&gt;NEXT&gt;&gt;</button>
+                <input checked type="checkbox" name="autoplay"/>Autoplay
+            </div>
         </div>
-
-		<div class="title"><span>No Videos Loaded</span></div>
-		
-        <table>
-			<tr>
-                <td><video class="left_repeater"  src="" controls controlsList="play pause"></video></td>
-                <td><video class="front"          src="" controls controlsList="play pause"></video></td>
-                <td><video class="right_repeater" src="" controls controlsList="play pause"></video></td>
-            </tr>
-			
-			<tr>
-				<td colspan="3"><video class="back" src="" controls controlsList="play pause"></video></td>
-			</tr>
-		</table> 
-		
+		<div>
+            <div class="title">
+                <span>No Videos Loaded</span>
+            </div>
+            <table>
+                <tr>
+                    <td><video class="left_repeater"  src="" controls controlsList="play pause"></video></td>
+                    <td><video class="front"          src="" controls controlsList="play pause"></video></td>
+                    <td><video class="right_repeater" src="" controls controlsList="play pause"></video></td>
+                </tr>
+                
+                <tr>
+                    <td colspan="3"><video class="back" src="" controls controlsList="play pause"></video></td>
+                </tr>
+            </table> 
+        </div>
+        <div class="readme">
+            <h2>README</h2>
+            <hr/>
+            <strong>Directory Placement</strong><br/>
+            This <code>index.html</code> file <strong>must</strong> be at the same level as the <code>TeslaCam</code> folder which can be placed directly on the root of the USB drive.<br/>
+            <strong>Example:</strong><br/>
+            <code>
+            Root Folder<br/>
+            |- index.html<br/>
+            |- TeslaCam(USB Drive Top Level Folder)<br/>
+            &nbsp;&nbsp;&nbsp;|- Saved Clips<br/>
+            &nbsp;&nbsp;&nbsp;|- Sentry Videos<br/>
+            &nbsp;&nbsp;&nbsp;|- ...<br/>
+            </code><br/>
+        </div>
 	</body>
-
-
-<div class="readme">
-<h2>README</h2>
-<hr/>
-<strong>Directory Placement</strong><br/>
-This <code>index.html</code> file must be at the same level as the <code>TeslaCam</code> folder which can be extracted directly from the USB drive.<br/>
-<code>
-Root Folder<br/>
-|- index.html<br/>
-|- TeslaCam(USB Drive Top Level Folder)<br/>
-&nbsp;&nbsp;&nbsp;|- Saved Clips<br/>
-&nbsp;&nbsp;&nbsp;|- Sentry Videos<br/>
-&nbsp;&nbsp;&nbsp;|- ...<br/>
-</code><br/>
-
-</div>
 
 <script>
 	var carouselIndex;
@@ -97,6 +126,10 @@ Root Folder<br/>
     var next = document.querySelector("button.next")
     var previous = document.querySelector("button.previous")
     var setVideos = document.querySelector("button.setVideos")
+
+    var dateSelector = document.querySelector("select.date-select")
+
+    var skip = document.querySelector("button.skip")
 
 
     class TeslaCamFile {
@@ -141,7 +174,7 @@ Root Folder<br/>
         }
     }
 	
-	//Input file
+	//The following code uses webkitdirectory to get all the videos from a directory
     document.querySelector("input[type=file][id=fileBrowser]").addEventListener("change", function(e){
         var files = e.target.files
         tcFiles = []
@@ -163,11 +196,11 @@ Root Folder<br/>
 
         // Create dropdown for clips
         tmpDir = [] //track dir's added
-        if(document.querySelector("select.date-select") != undefined) {
-            document.querySelector("select.date-select").remove()
-        }
-        dropDown = document.createElement("select")
-        dropDown.classList.add("date-select")
+        // if(document.querySelector("select.date-select") != undefined) {
+        //     document.querySelector("select.date-select").remove()
+        // }
+        dateSelector.innerHTML = null
+
         tcFiles.forEach((tcFile, index) => {
             dir = tcFile.clipType+tcFile.separator+tcFile.triggerDate
             if (tcFile.clipType == "RecentClips") {
@@ -179,17 +212,16 @@ Root Folder<br/>
                 var option = document.createElement("option")
                 option.innerText = dir
                 option.value = index // assume that the index is going to be the first clip for each new date.
-                dropDown.appendChild(option)
+                dateSelector.appendChild(option)
             }
         })
-        dropDown.addEventListener("change", function(e){
-            carouselIndex = parseInt(e.target.options[e.target.selectedIndex].value)
-            loadVideos(carouselIndex)
-        })
-        document.querySelector("div.global-controls").appendChild(dropDown)
 
         carousel = tcFiles
         loadVideos(0)
+    })
+    dateSelector.addEventListener("change", function(e){
+        carouselIndex = parseInt(e.target.options[e.target.selectedIndex].value)
+        loadVideos(carouselIndex)
     })
 
     function loadVideos(index){
@@ -225,17 +257,24 @@ Root Folder<br/>
     }
 
 	function playPause() {
-	  if (playPauseFlag!=true){
-		playVideos()
-		playPauseFlag = true;
-		}
-	  else{
-		pauseVideos()
-		playPauseFlag = false;
-		}
+        if (playPauseFlag!=true){
+            playVideos()
+            playPauseFlag = true;
+        } else {
+            pauseVideos()
+            playPauseFlag = false;
+        }
  	}
 	
     let videos = document.querySelectorAll("video");
+
+    function skipTo(seconds){
+        videos.forEach(video => {
+            video.currentTime += seconds
+        })
+    }
+
+    //Add listeners for play, pause and click buttons for each video.
     videos.forEach(video => {
         video.addEventListener("play", function(e){
             console.log(e)
@@ -280,7 +319,7 @@ Root Folder<br/>
     })
     
     var carouselIndex = 0
-    
+
     next.addEventListener("click", function(){
         carouselIndex+=1
         loadVideos(carouselIndex)
