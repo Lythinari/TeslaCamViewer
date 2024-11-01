@@ -25,6 +25,10 @@
                 padding: 5px;
                 text-align: center;
             }
+            .showMap > iframe {
+                width: 600px;
+                height: 450px;
+            }
             video {
                 width: 600px;
                 height: 450px;
@@ -88,7 +92,9 @@
                 </tr>
                 
                 <tr>
-                    <td colspan="3"><video class="back" src="" controls controlsList="play pause"></video></td>
+                    <td colspan="1" class="showMap" id="showMap"></td>
+                    <td colspan="1"><video class="back" src="" controls controlsList="play pause"></video></td>
+                    <td colspan="1"></td>
                 </tr>
             </table> 
         </div>
@@ -118,6 +124,7 @@
 	var playPauseFlag = true;
 	
     var carousel = []
+    var carouselEventFiles = []
     var title = document.querySelector("div.title")
     var backVideo = document.querySelector("video.back")
     var frontVideo = document.querySelector("video.front")
@@ -172,18 +179,32 @@
 
             return filePath + this.separator + this.clipName.replace(/-back.mp4$/gm,'')
         }
+
+        buildEvent(){
+            var filePath = "TeslaCam" + this.separator + this.clipType
+            if(this.clipType != "RecentClips"){
+                filePath += this.separator + this.triggerDate
+            }
+
+            return filePath + this.separator
+        }
     }
 	
+    
 	//The following code uses webkitdirectory to get all the videos from a directory
     document.querySelector("input[type=file][id=fileBrowser]").addEventListener("change", function(e){
         var files = e.target.files
         tcFiles = []
+        var eventFiles = {}
         //get "back" files to sort from webkitRelativePath
         for (let i=0; i<files.length; i++) {
             var file = files[i]
             if(file.webkitRelativePath.endsWith("-back.mp4")){
                 var tcFile = new TeslaCamFile(file)
                 tcFiles.push(tcFile)
+            }
+            if(file.webkitRelativePath.endsWith("event.json")){
+                eventFiles[file.webkitRelativePath] = file
             }
         }
         
@@ -217,6 +238,7 @@
         })
 
         carousel = tcFiles
+        carouselEventFiles = eventFiles
         loadVideos(0)
     })
     dateSelector.addEventListener("change", function(e){
@@ -230,6 +252,25 @@
         frontVideo.src = carousel[index].build()+"-front.mp4"
         leftVideo.src = carousel[index].build()+"-left_repeater.mp4"
         rightVideo.src = carousel[index].build()+"-right_repeater.mp4"
+        //load the map window -> display google maps
+
+        if (carouselEventFiles[carousel[index].buildEvent()+"event.json"] == undefined) {
+            document.querySelector("td#showMap").innerHTML = ""
+        } 
+
+        var reader = new FileReader();
+        reader.onload = function(e) {
+            var contents = e.target.result;
+            var data = JSON.parse(contents)
+            console.log(data)
+
+            var zoom = 2000
+            var iframe = document.createElement("iframe")
+            iframe.src = "https://www.google.com/maps/embed?pb=!1m10!1m8!1m3!1d"+zoom+"!2d"+data.est_lon+"!3d"+data.est_lat+"!!!!!!!!!!!"
+            document.querySelector("td#showMap").innerHTML = ""
+            document.querySelector("td#showMap").appendChild(iframe)
+        };
+        reader.readAsText(carouselEventFiles[carousel[index].buildEvent()+"event.json"]);
     }
 
     function playVideos(){
