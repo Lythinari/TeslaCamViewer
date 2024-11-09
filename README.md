@@ -19,7 +19,7 @@ Double check on `index.html` and open in any browser of your preference
 
 The address bar should show `file://<PATH TO INDEX FILE>/index.html`
 
-![UI](https://github.com/Lythinari/TeslaCamViewer/instructions/main.png)
+![UI](https://github.com/Lythinari/TeslaCamViewer/blob/main/instructions/main.png)
 
 
 | Browser Name             | Windows         | Mac             |
