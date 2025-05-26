@@ -86,15 +86,20 @@
             </div>
             <table>
                 <tr>
-                    <td><video class="left_repeater"  src="" controls controlsList="play pause"></video></td>
+                    <td colspan="1" class="showMap" id="showMap"></td>
+                    <td></td>
+                    <td></td>
+                </tr>
+                <tr>
+                    <td><video class="left_pillar"  src="" controls controlsList="play pause"></video></td>
                     <td><video class="front"          src="" controls controlsList="play pause"></video></td>
-                    <td><video class="right_repeater" src="" controls controlsList="play pause"></video></td>
+                    <td><video class="right_pillar"  src="" controls controlsList="play pause"></video></td>
                 </tr>
                 
                 <tr>
-                    <td colspan="1" class="showMap" id="showMap"></td>
+                    <td><video class="left_repeater"  src="" controls controlsList="play pause"></video></td>
                     <td colspan="1"><video class="back" src="" controls controlsList="play pause"></video></td>
-                    <td colspan="1"></td>
+                    <td><video class="right_repeater" src="" controls controlsList="play pause"></video></td>
                 </tr>
             </table> 
         </div>
@@ -130,6 +135,8 @@
     var frontVideo = document.querySelector("video.front")
     var leftVideo = document.querySelector("video.left_repeater")
     var rightVideo = document.querySelector("video.right_repeater")
+    var leftPillarVideo = document.querySelector("video.left_pillar")
+    var rightPillarVideo = document.querySelector("video.right_pillar")
     var next = document.querySelector("button.next")
     var previous = document.querySelector("button.previous")
     var setVideos = document.querySelector("button.setVideos")
@@ -252,6 +259,8 @@
         frontVideo.src = carousel[index].build()+"-front.mp4"
         leftVideo.src = carousel[index].build()+"-left_repeater.mp4"
         rightVideo.src = carousel[index].build()+"-right_repeater.mp4"
+        leftPillarVideo.src = carousel[index].build()+"-left_pillar.mp4"
+        rightPillarVideo.src = carousel[index].build()+"-right_pillar.mp4"
         //load the map window -> display google maps
 
         if (carouselEventFiles[carousel[index].buildEvent()+"event.json"] == undefined) {
@@ -278,11 +287,15 @@
         backVideo.play()
         leftVideo.play()
         rightVideo.play()
+        leftPillarVideo.play()
+        rightPillarVideo.play()
 
         frontVideo.playbackRate=playbackRate;
         backVideo.playbackRate=playbackRate;
         leftVideo.playbackRate=playbackRate;
         rightVideo.playbackRate=playbackRate;
+        leftPillarVideo.playbackRate=playbackRate;
+        rightPillarVideo.playbackRate=playbackRate;
     }
 	
     function playRate(rate){
@@ -295,6 +308,8 @@
         backVideo.pause()
         leftVideo.pause()
         rightVideo.pause()
+        leftPillarVideo.pause()
+        rightPillarVideo.pause()
     }
 
 	function playPause() {
@@ -348,6 +363,12 @@
             }
             if(e.target != backVideo) {
                 backVideo.currentTime = currentTime
+            }
+            if(e.target != leftPillarVideo) {
+                leftPillarVideo.currentTime = currentTime
+            }
+            if(e.target != rightPillarVideo) {
+                rightPillarVideo.currentTime = currentTime
             }
         })
 
