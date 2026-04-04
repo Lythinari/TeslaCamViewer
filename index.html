@@ -1,50 +1,94 @@
 <html>
     <head>
         <style>
+            /* --- NEW: Dark Mode & Modern Font --- */
+            body {
+                background-color: #121212;
+                color: #e0e0e0;
+                font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+            }
+
+            /* --- UPDATED: Darker borders --- */
             div {
-                border:1px solid;
+                border: 1px solid #333;
                 align-content: center;
             }
+
+            /* --- UPDATED: Nicer font, shifted right --- */
             div.title {
                 font-size: 25px;
-                text-align: center;
+                text-align: right; /* Shifts the path to the right */
+                padding-right: 20px; /* Gives it breathing room from the edge */
+                font-weight: 600; /* Makes the header a bit bolder */
             }
+
+            /* --- UPDATED: Softer red for dark mode --- */
             div.title>span {
-                color: red;
+                color: #ff6b6b;
             }
+
             div>div.global-controls{
                 display: inline-block;
             }
+
             .play_speed {
                 display: inline-block;
                 padding: 5px;
                 text-align: center;
             }
+
             .controls {
                 display: inline-block;
                 padding: 5px;
                 text-align: center;
             }
+
+            /* --- NEW: Styled buttons and inputs for Dark Mode --- */
+            button, select, input[type="file"] {
+                background-color: #2c2c2c;
+                color: #e0e0e0;
+                border: 1px solid #555;
+                padding: 4px 8px;
+                border-radius: 4px;
+                cursor: pointer;
+            }
+
+            button:hover, select:hover {
+                background-color: #444;
+            }
+
             .showMap > iframe {
                 width: 600px;
                 height: 450px;
             }
+
             video {
                 width: 600px;
                 height: 450px;
             }
+
             table tr td {
-                border:1px solid;
+                border: 1px solid #333;
                 text-align: center;
             }
+
             textarea {
                 width: 100%;
+                background-color: #2c2c2c;
+                color: #e0e0e0;
+                border: 1px solid #555;
             }
+
             div.readme {
-                padding: 5px;
+                padding: 15px;
             }
+
+            /* --- UPDATED: Dark mode for inline code --- */
             code {
-                background:lightgrey
+                background: #2b2b2b;
+                padding: 2px 6px;
+                border-radius: 3px;
+                color: #a6e22e; /* Soft green text for contrast */
             }
         </style>
     </head>
@@ -70,17 +114,17 @@
             </div>
             <div class="controls">
                 <span>General Controls</span><br/>
-                <button class="previous">&lt;&lt;PREV&lt;&lt;</button>
+                <button class="previous"><<PREV<<</button>
                 <button class="skip" onclick="skipTo(-5)">-5</button>
                 <button class="skip" onclick="skipTo(-3)">-3</button>
                 <button onclick="playPause()">PLAY/PAUSE</button>
                 <button class="skip" onclick="skipTo(3)">3</button>
                 <button class="skip" onclick="skipTo(5)">5</button>
-                <button class="next">&gt;&gt;NEXT&gt;&gt;</button>
+                <button class="next">>>NEXT>></button>
                 <input checked type="checkbox" name="autoplay"/>Autoplay
             </div>
         </div>
-		<div>
+        <div>
             <div class="title">
                 <span>No Videos Loaded</span>
             </div>
@@ -113,21 +157,21 @@
             Root Folder<br/>
             |- index.html<br/>
             |- TeslaCam(USB Drive Top Level Folder)<br/>
-            &nbsp;&nbsp;&nbsp;|- Saved Clips<br/>
-            &nbsp;&nbsp;&nbsp;|- Sentry Videos<br/>
-            &nbsp;&nbsp;&nbsp;|- ...<br/>
+               |- Saved Clips<br/>
+               |- Sentry Videos<br/>
+               |- ...<br/>
             </code><br/>
         </div>
-	</body>
+    </body>
 
 <script>
-	var carouselIndex;
-	var selectItemIndex;
-	var files;
-	
+    var carouselIndex;
+    var selectItemIndex;
+    var files;
+    
     var playbackRate = 1
-	var playPauseFlag = true;
-	
+    var playPauseFlag = true;
+    
     var carousel = []
     var carouselEventFiles = []
     var title = document.querySelector("div.title")
@@ -196,209 +240,8 @@
             return filePath + this.separator
         }
     }
-	
     
-	//The following code uses webkitdirectory to get all the videos from a directory
+    
+    //The following code uses webkitdirectory to get all the videos from a directory
     document.querySelector("input[type=file][id=fileBrowser]").addEventListener("change", function(e){
-        var files = e.target.files
-        tcFiles = []
-        var eventFiles = {}
-        //get "back" files to sort from webkitRelativePath
-        for (let i=0; i<files.length; i++) {
-            var file = files[i]
-            if(file.webkitRelativePath.endsWith("-back.mp4")){
-                var tcFile = new TeslaCamFile(file)
-                tcFiles.push(tcFile)
-            }
-            if(file.webkitRelativePath.endsWith("event.json")){
-                eventFiles[file.webkitRelativePath] = file
-            }
-        }
-        
-        //Sort the files in ascending date
-        tcFiles.sort(function(a,b){
-            var firstDate = a.clipDate
-            var secondDate = b.clipDate
-            return firstDate - secondDate
-        })
-
-        // Create dropdown for clips
-        tmpDir = [] //track dir's added
-        // if(document.querySelector("select.date-select") != undefined) {
-        //     document.querySelector("select.date-select").remove()
-        // }
-        dateSelector.innerHTML = null
-
-        tcFiles.forEach((tcFile, index) => {
-            dir = tcFile.clipType+tcFile.separator+tcFile.triggerDate
-            if (tcFile.clipType == "RecentClips") {
-                dir = tcFile.clipType+tcFile.separator+tcFile.clipName.replace(/-back.mp4$/gm,'')
-            }
-            
-            if (!tmpDir.includes(dir)) {
-                tmpDir.push(dir)
-                var option = document.createElement("option")
-                option.innerText = dir
-                option.value = index // assume that the index is going to be the first clip for each new date.
-                dateSelector.appendChild(option)
-            }
-        })
-
-        carousel = tcFiles
-        carouselEventFiles = eventFiles
-        loadVideos(0)
-    })
-    dateSelector.addEventListener("change", function(e){
-        carouselIndex = parseInt(e.target.options[e.target.selectedIndex].value)
-        loadVideos(carouselIndex)
-    })
-
-    function loadVideos(index){
-        title.innerHTML = carousel[index].build()
-        backVideo.src = carousel[index].build()+"-back.mp4"
-        frontVideo.src = carousel[index].build()+"-front.mp4"
-        leftVideo.src = carousel[index].build()+"-left_repeater.mp4"
-        rightVideo.src = carousel[index].build()+"-right_repeater.mp4"
-        leftPillarVideo.src = carousel[index].build()+"-left_pillar.mp4"
-        rightPillarVideo.src = carousel[index].build()+"-right_pillar.mp4"
-        //load the map window -> display google maps
-
-        if (carouselEventFiles[carousel[index].buildEvent()+"event.json"] == undefined) {
-            document.querySelector("td#showMap").innerHTML = ""
-        } 
-
-        var reader = new FileReader();
-        reader.onload = function(e) {
-            var contents = e.target.result;
-            var data = JSON.parse(contents)
-            console.log(data)
-
-            var zoom = 2000
-            var iframe = document.createElement("iframe")
-            iframe.src = "https://www.google.com/maps/embed?pb=!1m10!1m8!1m3!1d"+zoom+"!2d"+data.est_lon+"!3d"+data.est_lat+"!!!!!!!!!!!"
-            document.querySelector("td#showMap").innerHTML = ""
-            document.querySelector("td#showMap").appendChild(iframe)
-        };
-        reader.readAsText(carouselEventFiles[carousel[index].buildEvent()+"event.json"]);
-    }
-
-    function playVideos(){
-        frontVideo.play()
-        backVideo.play()
-        leftVideo.play()
-        rightVideo.play()
-        leftPillarVideo.play()
-        rightPillarVideo.play()
-
-        frontVideo.playbackRate=playbackRate;
-        backVideo.playbackRate=playbackRate;
-        leftVideo.playbackRate=playbackRate;
-        rightVideo.playbackRate=playbackRate;
-        leftPillarVideo.playbackRate=playbackRate;
-        rightPillarVideo.playbackRate=playbackRate;
-    }
-	
-    function playRate(rate){
-        playbackRate = rate
-        playVideos()
-    }
-
-    function pauseVideos(){
-        frontVideo.pause()
-        backVideo.pause()
-        leftVideo.pause()
-        rightVideo.pause()
-        leftPillarVideo.pause()
-        rightPillarVideo.pause()
-    }
-
-	function playPause() {
-        if (playPauseFlag!=true){
-            playVideos()
-            playPauseFlag = true;
-        } else {
-            pauseVideos()
-            playPauseFlag = false;
-        }
- 	}
-	
-    let videos = document.querySelectorAll("video");
-
-    function skipTo(seconds){
-        videos.forEach(video => {
-            video.currentTime += seconds
-        })
-    }
-
-    //Add listeners for play, pause and click buttons for each video.
-    videos.forEach(video => {
-        video.addEventListener("play", function(e){
-            console.log(e)
-            playVideos()
-        })
-
-        video.addEventListener("pause", function(e){
-            console.log(e)
-            if(e.target.ended){
-                if(document.querySelector("input[name=autoplay]").checked){
-                    carouselIndex+=1
-                    loadVideos(carouselIndex)
-                }
-            } else {
-                pauseVideos()
-            }
-        })
-
-        video.addEventListener("click", function(e){
-            console.log(e)
-            var currentTime = e.target.currentTime
-            if(e.target != frontVideo) {
-                frontVideo.currentTime = currentTime
-            }
-            if(e.target != leftVideo) {
-                leftVideo.currentTime = currentTime
-            }
-            if(e.target != rightVideo) {
-                rightVideo.currentTime = currentTime
-            }
-            if(e.target != backVideo) {
-                backVideo.currentTime = currentTime
-            }
-            if(e.target != leftPillarVideo) {
-                leftPillarVideo.currentTime = currentTime
-            }
-            if(e.target != rightPillarVideo) {
-                rightPillarVideo.currentTime = currentTime
-            }
-        })
-
-        video.addEventListener("canplaythrough", function(e){
-            console.log("Can Play Through")
-            if(document.querySelector("input[name=autoplay]").checked){
-                playVideos()
-            }
-        })
-    })
-    
-    var carouselIndex = 0
-
-    next.addEventListener("click", function(){
-        carouselIndex+=1
-        loadVideos(carouselIndex)
-    })
-
-    previous.addEventListener("click", function(){
-        carouselIndex-=1
-        loadVideos(carouselIndex)
-    })
-
-    backVideo.addEventListener("ended", function(){
-        console.log("Ended")
-        if(document.querySelector("input[name=autoplay]").checked){
-            carouselIndex+=1
-            loadVideos(carouselIndex)
-        }
-    })
-	
-</script>
-</html>
+        var files = e
