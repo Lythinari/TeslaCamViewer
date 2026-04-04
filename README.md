@@ -1,3 +1,12 @@
+## 🌙 UI Update: Dark Mode
+This fork includes a modernized, Dark Mode UI for the viewer. The core functionality remains identical to Lythinari's original work, but the styling has been updated to include:
+* A global dark background for more comfortable viewing in low light.
+* Softer borders and customized control buttons.
+* A modernized sans-serif font stack.
+* A shifted file path display to give the video grid more breathing room.
+
+*Note: CSS styling was generated with the help of AI (Gemini).*
+
 # HTML Driven Tesla Dashcam Viewer
 An extremely simple HTML Dashcam Viewer that has a simple installation set up, does not require any web server or software installation other than a functioning browser.
 
