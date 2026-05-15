@@ -1,67 +1,372 @@
-<html>
+<!DOCTYPE html>
+<html lang="en">
     <head>
-        <style>
-            div {
-                border:1px solid;
-                align-content: center;
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>TeslaCam Viewer</title>
+        <script src="https://unpkg.com/protobufjs@7.4.0/dist/protobuf.min.js"></script>
+<style>
+            :root {
+                --bg: #0f0f0f;
+                --panel: #1a1a1a;
+                --input: #2a2a2a;
+                --text: #e0e0e0;
+                --text-strong: #fff;
+                --text-muted: #aaa;
+                --text-dim: #888;
+                --text-dimmer: #666;
+                --border: #444;
+                --border-subtle: #333;
+                --hover: #3a3a3a;
+                --active: #444;
+                --video-bg: #000;
+                --svg-stroke: #555;
             }
+            .light {
+                --bg: #f0f0f0;
+                --panel: #ffffff;
+                --input: #e4e4e4;
+                --text: #222;
+                --text-strong: #000;
+                --text-muted: #555;
+                --text-dim: #666;
+                --text-dimmer: #888;
+                --border: #ccc;
+                --border-subtle: #ddd;
+                --hover: #d8d8d8;
+                --active: #ccc;
+                --video-bg: #222;
+                --svg-stroke: #999;
+            }
+
+            *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+            body {
+                font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+                background: var(--bg);
+                color: var(--text);
+                padding: 20px;
+                line-height: 1.5;
+                transition: background 0.2s, color 0.2s;
+            }
+
+            div { border: none; }
+
             div.title {
-                font-size: 25px;
+                font-size: 1.25rem;
                 text-align: center;
+                padding: 12px;
+                margin-bottom: 16px;
             }
-            div.title>span {
-                color: red;
+            div.title > span { color: #e74c3c; }
+
+            .file-select {
+                background: var(--panel);
+                border-radius: 10px;
+                padding: 16px 20px;
+                margin-bottom: 16px;
+                display: flex;
+                flex-wrap: wrap;
+                align-items: center;
+                gap: 16px;
             }
-            div>div.global-controls{
-                display: inline-block;
+            .file-select strong { color: var(--text-strong); }
+            .file-select select {
+                background: var(--input);
+                color: var(--text);
+                border: 1px solid var(--border);
+                border-radius: 6px;
+                padding: 6px 10px;
+                font-size: 0.9rem;
             }
-            .play_speed {
-                display: inline-block;
-                padding: 5px;
-                text-align: center;
+            .file-select input[type="file"] {
+                display: none;
             }
-            .controls {
-                display: inline-block;
-                padding: 5px;
-                text-align: center;
+            .file-select .browse-btn {
+                background: #e74c3c;
+                color: #fff;
+                border: none;
+                padding: 8px 18px;
+                font-size: 0.9rem;
+                font-weight: bold;
+                cursor: pointer;
+            }
+            .file-select .browse-btn:hover {
+                background: #c0392b;
+                border-color: transparent;
+            }
+
+            .theme-toggle {
+                margin-left: auto;
+                font-size: 1.2rem;
+                background: var(--input);
+                border: 1px solid var(--border);
+                padding: 4px 10px;
+                cursor: pointer;
+                line-height: 1;
+            }
+            .theme-toggle:hover {
+                border-color: #e74c3c;
+                background: var(--hover);
+            }
+
+            .global-controls {
+                display: flex;
+                flex-wrap: wrap;
+                justify-content: center;
+                gap: 12px;
+                margin-bottom: 16px;
+            }
+            .play_speed, .controls {
+                display: flex;
+                align-items: center;
+                gap: 6px;
+                background: var(--panel);
+                padding: 10px 16px;
+                border-radius: 10px;
+            }
+            .play_speed span, .controls span {
+                color: var(--text-dim);
+                font-size: 0.8rem;
+                text-transform: uppercase;
+                letter-spacing: 0.05em;
+                margin-right: 4px;
+            }
+
+            button {
+                background: var(--input);
+                color: var(--text);
+                border: 1px solid var(--border);
+                border-radius: 6px;
+                padding: 6px 14px;
+                cursor: pointer;
+                font-size: 0.85rem;
+                transition: background 0.15s, border-color 0.15s;
+            }
+            button:hover {
+                background: var(--hover);
+                border-color: #e74c3c;
+            }
+            button:active { background: var(--active); }
+
+            input[type="checkbox"] {
+                accent-color: #e74c3c;
+                margin-right: 4px;
+            }
+
+            .showMap {
+                margin-top: 12px;
             }
             .showMap > iframe {
-                width: 600px;
+                width: 100%;
                 height: 450px;
+                border-radius: 6px;
+                border: none;
             }
             video {
-                width: 600px;
-                height: 450px;
+                width: 100%;
+                max-width: 600px;
+                height: auto;
+                border-radius: 6px;
+                background: var(--video-bg);
+            }
+
+            table {
+                width: 100%;
+                border-collapse: separate;
+                border-spacing: 6px;
             }
             table tr td {
-                border:1px solid;
+                border: none;
                 text-align: center;
+                background: var(--panel);
+                border-radius: 8px;
+                padding: 4px;
             }
-            textarea {
-                width: 100%;
-            }
+
+            textarea { width: 100%; }
+
             div.readme {
-                padding: 5px;
+                background: var(--panel);
+                border-radius: 10px;
+                padding: 20px;
+                margin-top: 16px;
+                font-size: 0.9rem;
+                color: var(--text-muted);
+            }
+            div.readme h2 {
+                color: var(--text-strong);
+                margin-bottom: 8px;
+            }
+            div.readme hr {
+                border: none;
+                border-top: 1px solid var(--border-subtle);
+                margin-bottom: 12px;
             }
             code {
-                background:lightgrey
+                background: var(--input);
+                color: #e74c3c;
+                padding: 2px 6px;
+                border-radius: 4px;
+                font-size: 0.85em;
+            }
+
+            .telemetry {
+                display: none;
+                background: var(--panel);
+                border-radius: 10px;
+                padding: 10px 20px;
+                margin-bottom: 16px;
+                align-items: center;
+                justify-content: center;
+                gap: 16px;
+                flex-wrap: wrap;
+                font-size: 0.9rem;
+            }
+            .telemetry.visible { display: flex; }
+            .tele-item {
+                display: flex;
+                align-items: center;
+                gap: 4px;
+            }
+            .tele-label {
+                color: var(--text-dimmer);
+                font-size: 0.75rem;
+                text-transform: uppercase;
+                letter-spacing: 0.05em;
+            }
+            .tele-gear {
+                background: var(--input);
+                border: 1px solid var(--border);
+                border-radius: 4px;
+                padding: 2px 10px;
+                font-weight: bold;
+                font-size: 1.1rem;
+            }
+            .tele-speed {
+                font-size: 1.3rem;
+                font-weight: bold;
+                color: var(--text-strong);
+                min-width: 90px;
+                text-align: right;
+            }
+            .tele-blinker {
+                font-size: 1.1rem;
+                color: var(--border);
+                transition: color 0.15s;
+            }
+            @keyframes blink {
+                0%, 100% { opacity: 1; }
+                50% { opacity: 0.15; }
+            }
+            .tele-blinker.active { color: #f39c12; animation: blink 0.7s step-end infinite; }
+            .tele-brake {
+                color: var(--border);
+                font-weight: bold;
+                font-size: 0.8rem;
+                border: 1px solid var(--border);
+                border-radius: 4px;
+                padding: 2px 8px;
+                transition: color 0.15s, border-color 0.15s;
+            }
+            .tele-brake.active { color: #e74c3c; border-color: #e74c3c; }
+            .tele-ap {
+                border-radius: 4px;
+                padding: 2px 8px;
+                font-size: 0.8rem;
+                font-weight: bold;
+                background: var(--input);
+                border: 1px solid var(--border);
+            }
+            .tele-ap.engaged { color: #3498db; border-color: #3498db; }
+            .tele-steering-wrap {
+                display: flex;
+                align-items: center;
+                gap: 6px;
+            }
+            .tele-steering-wheel {
+                transition: transform 0.1s;
+            }
+            .tele-steering-wheel circle, .tele-steering-wheel line.spoke {
+                stroke: var(--svg-stroke);
+            }
+            .tele-steering-wheel line.needle {
+                stroke: var(--text-strong);
+            }
+            .tele-steering-val {
+                font-size: 0.85rem;
+                min-width: 45px;
+            }
+            .tele-pedal-wrap {
+                display: flex;
+                align-items: center;
+                gap: 6px;
+            }
+            .tele-pedal-bar {
+                width: 6px;
+                height: 28px;
+                background: var(--input);
+                border-radius: 3px;
+                overflow: hidden;
+                position: relative;
+                border: 1px solid var(--border-subtle);
+            }
+            .tele-pedal-fill {
+                position: absolute;
+                bottom: 0;
+                width: 100%;
+                background: #2ecc71;
+                border-radius: 2px;
+                transition: height 0.1s;
+            }
+            .tele-pedal-val {
+                font-size: 0.85rem;
+                min-width: 30px;
+            }
+            .tele-brake-bar {
+                width: 6px;
+                height: 28px;
+                background: var(--input);
+                border-radius: 3px;
+                overflow: hidden;
+                position: relative;
+                border: 1px solid var(--border-subtle);
+            }
+            .tele-brake-fill {
+                position: absolute;
+                bottom: 0;
+                width: 100%;
+                background: #e74c3c;
+                border-radius: 2px;
+                transition: height 0.15s;
+                height: 0%;
+            }
+            .unit-toggle {
+                font-size: 0.75rem;
+                padding: 3px 8px;
+                margin-left: auto;
             }
         </style>
     </head>
     <body>
-        <div>
+        <div class="file-select">
             <div>
-                <strong>Select TeslaCam Directory</strong>(Must be in same directory as Index.html):<br/> 
+                <button class="browse-btn" onclick="document.getElementById('fileBrowser').click()">Open TeslaCam Folder</button>
                 <input type="file" id="fileBrowser" accept="video/mp4" webkitdirectory multiple/>
             </div>
-            <div>   
-                Browse Loaded Clips: <select class="date-select"><option>- - - - - -</option></select>
+            <div>
+                Select Loaded Clips: <select class="date-select"><option>- - - - - -</option></select>
             </div>
+            <button class="theme-toggle" onclick="toggleTheme()" title="Toggle light/dark mode">&#9788;</button>
         </div>
-        
-        <div class="global-controls">
+
+        <div class="title">
+            <span>No Videos Loaded</span>
+        </div>
+
+        <div class="global-controls" style="display:none">
             <div class="play_speed">
-                <span>Play Speed</span><br/>
+                <span>Speed</span>
                 <button onclick="playRate(0.5)">0.5x</button>
                 <button onclick="playRate(1)">1x</button>
                 <button onclick="playRate(2)">2x</button>
@@ -69,67 +374,79 @@
                 <button onclick="playRate(8)">8x</button>
             </div>
             <div class="controls">
-                <span>General Controls</span><br/>
-                <button class="previous">&lt;&lt;PREV&lt;&lt;</button>
-                <button class="skip" onclick="skipTo(-5)">-5</button>
-                <button class="skip" onclick="skipTo(-3)">-3</button>
-                <button onclick="playPause()">PLAY/PAUSE</button>
-                <button class="skip" onclick="skipTo(3)">3</button>
-                <button class="skip" onclick="skipTo(5)">5</button>
-                <button class="next">&gt;&gt;NEXT&gt;&gt;</button>
-                <input checked type="checkbox" name="autoplay"/>Autoplay
+                <span>Controls</span>
+                <button class="previous">&laquo; Prev</button>
+                <button class="skip" onclick="skipTo(-5)">-5s</button>
+                <button class="skip" onclick="skipTo(-3)">-3s</button>
+                <button onclick="playPause()">Play / Pause</button>
+                <button class="skip" onclick="skipTo(3)">+3s</button>
+                <button class="skip" onclick="skipTo(5)">+5s</button>
+                <button class="next">Next &raquo;</button>
+                <label><input checked type="checkbox" name="autoplay"/>Autoplay</label>
             </div>
         </div>
-		<div>
-            <div class="title">
-                <span>No Videos Loaded</span>
+        <div class="telemetry">
+            <div class="tele-item"><span class="tele-gear">P</span></div>
+            <div class="tele-item"><span class="tele-speed">0 km/h</span></div>
+            <div class="tele-item"><span class="tele-blinker tele-blinker-left">&#9664;</span></div>
+            <div class="tele-item"><span class="tele-blinker tele-blinker-right">&#9654;</span></div>
+            <div class="tele-item">
+                <span class="tele-label">Brake</span>
+                <div class="tele-brake-bar"><div class="tele-brake-fill"></div></div>
             </div>
+            <div class="tele-item tele-steering-wrap">
+                <span class="tele-label">Steering</span>
+                <svg class="tele-steering-wheel" width="36" height="36" viewBox="0 0 36 36">
+                    <circle cx="18" cy="18" r="14" fill="none" stroke-width="2.5"/>
+                    <circle cx="18" cy="18" r="4" fill="none" stroke-width="1.5"/>
+                    <line class="needle" x1="18" y1="14" x2="18" y2="4" stroke-width="2" stroke-linecap="round"/>
+                    <line class="spoke" x1="14" y1="20" x2="4" y2="20" stroke-width="1.5" stroke-linecap="round"/>
+                    <line class="spoke" x1="22" y1="20" x2="32" y2="20" stroke-width="1.5" stroke-linecap="round"/>
+                    <line class="spoke" x1="18" y1="22" x2="18" y2="32" stroke-width="1.5" stroke-linecap="round"/>
+                </svg>
+                <span class="tele-steering-val">0.0&deg;</span>
+            </div>
+            <div class="tele-item tele-pedal-wrap">
+                <span class="tele-label">Pedal</span>
+                <div class="tele-pedal-bar"><div class="tele-pedal-fill"></div></div>
+                <span class="tele-pedal-val">0%</span>
+            </div>
+            <div class="tele-item"><span class="tele-ap">AP Off</span></div>
+            <button class="unit-toggle" onclick="toggleUnit()">Show mph</button>
+        </div>
+		<div class="player" style="display:none">
             <table>
-                <tr>
-                    <td colspan="1" class="showMap" id="showMap"></td>
-                    <td></td>
-                    <td></td>
-                </tr>
                 <tr>
                     <td><video class="left_pillar"  src="" controls controlsList="play pause"></video></td>
                     <td><video class="front"          src="" controls controlsList="play pause"></video></td>
                     <td><video class="right_pillar"  src="" controls controlsList="play pause"></video></td>
                 </tr>
-                
                 <tr>
                     <td><video class="left_repeater"  src="" controls controlsList="play pause"></video></td>
-                    <td colspan="1"><video class="back" src="" controls controlsList="play pause"></video></td>
+                    <td><video class="back" src="" controls controlsList="play pause"></video></td>
                     <td><video class="right_repeater" src="" controls controlsList="play pause"></video></td>
                 </tr>
-            </table> 
+            </table>
+            <div class="showMap" id="showMap"></div>
         </div>
         <div class="readme">
             <h2>README</h2>
             <hr/>
-            <strong>Directory Placement</strong><br/>
-            This <code>index.html</code> file <strong>must</strong> be at the same level as the <code>TeslaCam</code> folder which can be placed directly on the root of the USB drive.<br/>
-            <strong>Example:</strong><br/>
-            <code>
-            Root Folder<br/>
-            |- index.html<br/>
-            |- TeslaCam(USB Drive Top Level Folder)<br/>
-            &nbsp;&nbsp;&nbsp;|- Saved Clips<br/>
-            &nbsp;&nbsp;&nbsp;|- Sentry Videos<br/>
-            &nbsp;&nbsp;&nbsp;|- ...<br/>
-            </code><br/>
+            <strong>Usage</strong><br/>
+            Open this file in a browser, then use the directory picker to select your <code>TeslaCam</code> folder (or any parent folder containing it). This file can live anywhere &mdash; inside the <code>TeslaCam</code> folder, alongside it, or on a different drive entirely.
         </div>
-	</body>
 
 <script>
 	var carouselIndex;
 	var selectItemIndex;
 	var files;
-	
+
     var playbackRate = 1
 	var playPauseFlag = true;
-	
+
     var carousel = []
-    var carouselEventFiles = []
+    var allFiles = {}
+    var activeUrls = []
     var title = document.querySelector("div.title")
     var backVideo = document.querySelector("video.back")
     var frontVideo = document.querySelector("video.front")
@@ -147,19 +464,17 @@
 
 
     class TeslaCamFile {
-        separator = "/" //default separator(necessary? not sure)
-        clipType = "SentryClip" //Recorded/SentryClip...
-        triggerDate = "" // folder name doubles as the date the video clip was triggered
-        clipDate = "" // transformed clip name
-        clipName = "" // the clip name
-        file = "" // webkit file incase we need other data
+        separator = "/"
+        clipType = "SentryClip"
+        triggerDate = ""
+        clipDate = ""
+        clipName = ""
+        file = ""
 
         constructor(file){
             this.clipName = file.name
             this.clipDate = Date.parse(this.parseToDate(file.name))
             this.getDirectories(file)
-
-            //just in case we need it for the future
             this.file = file
         }
 
@@ -170,30 +485,28 @@
             this.triggerDate = directoryParts[2]
         }
 
-        //format to ISO(sorta) - no TZ so defaults to local
         parseToDate(filename){
             let nameArry = filename.split("_");
             let dateArry = nameArry[0].split("-");
             let hourArry = nameArry[1].split("-");
-            return dateArry[0]+"-"+dateArry[1]+"-"+dateArry[2]+"T"+hourArry[0]+":"+hourArry[1]+":"+hourArry[2]; 
+            return dateArry[0]+"-"+dateArry[1]+"-"+dateArry[2]+"T"+hourArry[0]+":"+hourArry[1]+":"+hourArry[2];
         }
 
-        build(){
-            var filePath = "TeslaCam" + this.separator + this.clipType
-            if(this.clipType != "RecentClips"){
-                filePath += this.separator + this.triggerDate
-            }
-
-            return filePath + this.separator + this.clipName.replace(/-back.mp4$/gm,'')
+        // webkitRelativePath for a given camera suffix
+        pathFor(suffix){
+            return this.file.webkitRelativePath.replace(/-back\.mp4$/, "-" + suffix + ".mp4")
         }
 
-        buildEvent(){
-            var filePath = "TeslaCam" + this.separator + this.clipType
-            if(this.clipType != "RecentClips"){
-                filePath += this.separator + this.triggerDate
-            }
+        eventPath(){
+            return this.file.webkitRelativePath.replace(/[^\/\\]*$/, "event.json")
+        }
 
-            return filePath + this.separator
+        label(){
+            var label = this.clipType + this.separator
+            if(this.clipType != "RecentClips"){
+                label += this.triggerDate + this.separator
+            }
+            return label + this.clipName.replace(/-back\.mp4$/, "")
         }
     }
 	
@@ -201,51 +514,41 @@
 	//The following code uses webkitdirectory to get all the videos from a directory
     document.querySelector("input[type=file][id=fileBrowser]").addEventListener("change", function(e){
         var files = e.target.files
-        tcFiles = []
-        var eventFiles = {}
-        //get "back" files to sort from webkitRelativePath
+        if(!files.length) return
+        var tcFiles = []
+        allFiles = {}
+
         for (let i=0; i<files.length; i++) {
             var file = files[i]
+            allFiles[file.webkitRelativePath] = file
             if(file.webkitRelativePath.endsWith("-back.mp4")){
-                var tcFile = new TeslaCamFile(file)
-                tcFiles.push(tcFile)
-            }
-            if(file.webkitRelativePath.endsWith("event.json")){
-                eventFiles[file.webkitRelativePath] = file
+                tcFiles.push(new TeslaCamFile(file))
             }
         }
-        
-        //Sort the files in ascending date
-        tcFiles.sort(function(a,b){
-            var firstDate = a.clipDate
-            var secondDate = b.clipDate
-            return firstDate - secondDate
-        })
 
-        // Create dropdown for clips
-        tmpDir = [] //track dir's added
-        // if(document.querySelector("select.date-select") != undefined) {
-        //     document.querySelector("select.date-select").remove()
-        // }
+        tcFiles.sort(function(a,b){ return a.clipDate - b.clipDate })
+
         dateSelector.innerHTML = null
+        var tmpDir = []
 
         tcFiles.forEach((tcFile, index) => {
-            dir = tcFile.clipType+tcFile.separator+tcFile.triggerDate
+            var dir = tcFile.clipType + tcFile.separator + tcFile.triggerDate
             if (tcFile.clipType == "RecentClips") {
-                dir = tcFile.clipType+tcFile.separator+tcFile.clipName.replace(/-back.mp4$/gm,'')
+                dir = tcFile.clipType + tcFile.separator + tcFile.clipName.replace(/-back\.mp4$/, '')
             }
-            
+
             if (!tmpDir.includes(dir)) {
                 tmpDir.push(dir)
                 var option = document.createElement("option")
                 option.innerText = dir
-                option.value = index // assume that the index is going to be the first clip for each new date.
+                option.value = index
                 dateSelector.appendChild(option)
             }
         })
 
         carousel = tcFiles
-        carouselEventFiles = eventFiles
+        document.querySelector(".global-controls").style.display = ""
+        document.querySelector(".player").style.display = ""
         loadVideos(0)
     })
     dateSelector.addEventListener("change", function(e){
@@ -253,33 +556,58 @@
         loadVideos(carouselIndex)
     })
 
+    function getFileUrl(path){
+        var file = allFiles[path]
+        if(!file) return ""
+        var url = URL.createObjectURL(file)
+        activeUrls.push(url)
+        return url
+    }
+
+    function revokeUrls(){
+        activeUrls.forEach(function(url){ URL.revokeObjectURL(url) })
+        activeUrls = []
+    }
+
+    function setVideoSrc(video, path){
+        var url = getFileUrl(path)
+        video.src = url
+        video.style.display = url ? "" : "none"
+    }
+
     function loadVideos(index){
-        title.innerHTML = carousel[index].build()
-        backVideo.src = carousel[index].build()+"-back.mp4"
-        frontVideo.src = carousel[index].build()+"-front.mp4"
-        leftVideo.src = carousel[index].build()+"-left_repeater.mp4"
-        rightVideo.src = carousel[index].build()+"-right_repeater.mp4"
-        leftPillarVideo.src = carousel[index].build()+"-left_pillar.mp4"
-        rightPillarVideo.src = carousel[index].build()+"-right_pillar.mp4"
-        //load the map window -> display google maps
+        var tc = carousel[index]
+        revokeUrls()
 
-        if (carouselEventFiles[carousel[index].buildEvent()+"event.json"] == undefined) {
-            document.querySelector("td#showMap").innerHTML = ""
-        } 
+        var date = new Date(tc.clipDate)
+        var timestamp = date.toLocaleDateString(undefined, { weekday:"short", year:"numeric", month:"short", day:"numeric" })
+            + " " + date.toLocaleTimeString()
+        title.innerHTML = tc.label() + ' <span>' + timestamp + '</span>'
+        setVideoSrc(backVideo, tc.pathFor("back"))
+        setVideoSrc(frontVideo, tc.pathFor("front"))
+        setVideoSrc(leftVideo, tc.pathFor("left_repeater"))
+        setVideoSrc(rightVideo, tc.pathFor("right_repeater"))
+        setVideoSrc(leftPillarVideo, tc.pathFor("left_pillar"))
+        setVideoSrc(rightPillarVideo, tc.pathFor("right_pillar"))
 
-        var reader = new FileReader();
-        reader.onload = function(e) {
-            var contents = e.target.result;
-            var data = JSON.parse(contents)
-            console.log(data)
+        loadTelemetry(tc)
 
+        var eventFile = allFiles[tc.eventPath()]
+        if(!eventFile){
+            document.querySelector("#showMap").innerHTML = ""
+            return
+        }
+
+        var reader = new FileReader()
+        reader.onload = function(e){
+            var data = JSON.parse(e.target.result)
             var zoom = 2000
             var iframe = document.createElement("iframe")
             iframe.src = "https://www.google.com/maps/embed?pb=!1m10!1m8!1m3!1d"+zoom+"!2d"+data.est_lon+"!3d"+data.est_lat+"!!!!!!!!!!!"
-            document.querySelector("td#showMap").innerHTML = ""
-            document.querySelector("td#showMap").appendChild(iframe)
-        };
-        reader.readAsText(carouselEventFiles[carousel[index].buildEvent()+"event.json"]);
+            document.querySelector("#showMap").innerHTML = ""
+            document.querySelector("#showMap").appendChild(iframe)
+        }
+        reader.readAsText(eventFile)
     }
 
     function playVideos(){
@@ -399,6 +727,241 @@
             loadVideos(carouselIndex)
         }
     })
-	
+
+    // ---- Telemetry ----
+
+    var PROTO_DEF = [
+        'syntax = "proto3";',
+        'message SeiMetadata {',
+        '  uint32 version = 1;',
+        '  enum Gear { GEAR_PARK = 0; GEAR_DRIVE = 1; GEAR_REVERSE = 2; GEAR_NEUTRAL = 3; }',
+        '  Gear gear_state = 2;',
+        '  uint64 frame_seq_no = 3;',
+        '  float vehicle_speed_mps = 4;',
+        '  float accelerator_pedal_position = 5;',
+        '  float steering_wheel_angle = 6;',
+        '  bool blinker_on_left = 7;',
+        '  bool blinker_on_right = 8;',
+        '  bool brake_applied = 9;',
+        '  enum AutopilotState { NONE = 0; SELF_DRIVING = 1; AUTOSTEER = 2; TACC = 3; }',
+        '  AutopilotState autopilot_state = 10;',
+        '  double latitude_deg = 11;',
+        '  double longitude_deg = 12;',
+        '  double heading_deg = 13;',
+        '  double linear_acceleration_mps2_x = 14;',
+        '  double linear_acceleration_mps2_y = 15;',
+        '  double linear_acceleration_mps2_z = 16;',
+        '}'
+    ].join('\n')
+
+    var SeiMetadata = null
+    var seiFrames = []
+    var currentUnit = 'metric'
+
+    // DashcamMP4 parser (based on github.com/teslamotors/dashcam)
+    class DashcamMP4 {
+        constructor(buffer) {
+            this.buffer = buffer
+            this.view = new DataView(buffer)
+            this._config = null
+        }
+
+        findBox(start, end, name) {
+            for (var pos = start; pos + 8 <= end;) {
+                var size = this.view.getUint32(pos)
+                var type = this.readAscii(pos + 4, 4)
+                var headerSize = size === 1 ? 16 : 8
+                if (size === 1) {
+                    var high = this.view.getUint32(pos + 8)
+                    var low = this.view.getUint32(pos + 12)
+                    size = Number((BigInt(high) << 32n) | BigInt(low))
+                } else if (size === 0) {
+                    size = end - pos
+                }
+                if (type === name) return { start: pos + headerSize, end: pos + size, size: size - headerSize }
+                pos += size
+            }
+            throw new Error('Box "' + name + '" not found')
+        }
+
+        findMdat() {
+            var mdat = this.findBox(0, this.view.byteLength, 'mdat')
+            return { offset: mdat.start, size: mdat.size }
+        }
+
+        getConfig() {
+            if (this._config) return this._config
+            var moov = this.findBox(0, this.view.byteLength, 'moov')
+            var trak = this.findBox(moov.start, moov.end, 'trak')
+            var mdia = this.findBox(trak.start, trak.end, 'mdia')
+            var minf = this.findBox(mdia.start, mdia.end, 'minf')
+            var stbl = this.findBox(minf.start, minf.end, 'stbl')
+
+            var mdhd = this.findBox(mdia.start, mdia.end, 'mdhd')
+            var mdhdVer = this.view.getUint8(mdhd.start)
+            var timescale = mdhdVer === 1
+                ? this.view.getUint32(mdhd.start + 20)
+                : this.view.getUint32(mdhd.start + 12)
+
+            var stts = this.findBox(stbl.start, stbl.end, 'stts')
+            var entryCount = this.view.getUint32(stts.start + 4)
+            var durations = [], p = stts.start + 8
+            for (var i = 0; i < entryCount; i++) {
+                var count = this.view.getUint32(p)
+                var delta = this.view.getUint32(p + 4)
+                var ms = (delta / timescale) * 1000
+                for (var j = 0; j < count; j++) durations.push(ms)
+                p += 8
+            }
+
+            this._config = { timescale: timescale, durations: durations }
+            return this._config
+        }
+
+        extractSeiFrames(SeiType) {
+            var config = this.getConfig()
+            var mdat = this.findMdat()
+            var results = []
+            var cursor = mdat.offset, end = mdat.offset + mdat.size
+            var pendingSei = null, frameIndex = 0, time = 0
+
+            while (cursor + 4 <= end) {
+                var len = this.view.getUint32(cursor)
+                cursor += 4
+                if (len < 1 || cursor + len > this.view.byteLength) break
+                var type = this.view.getUint8(cursor) & 0x1F
+                if (type === 6) {
+                    pendingSei = this.decodeSei(new Uint8Array(this.buffer.slice(cursor, cursor + len)), SeiType)
+                } else if (type === 5 || type === 1) {
+                    if (pendingSei) results.push({ time: time, sei: pendingSei })
+                    pendingSei = null
+                    var dur = config.durations[frameIndex] || config.durations[0] || 33.33
+                    time += dur / 1000
+                    frameIndex++
+                }
+                cursor += len
+            }
+            return results
+        }
+
+        decodeSei(nal, SeiType) {
+            if (!SeiType || nal.length < 4) return null
+            var i = 3
+            while (i < nal.length && nal[i] === 0x42) i++
+            if (i <= 3 || i + 1 >= nal.length || nal[i] !== 0x69) return null
+            try { return SeiType.decode(this.stripEmulation(nal.subarray(i + 1, nal.length - 1))) }
+            catch(e) { return null }
+        }
+
+        stripEmulation(data) {
+            var out = [], zeros = 0
+            for (var b of data) {
+                if (zeros >= 2 && b === 0x03) { zeros = 0; continue }
+                out.push(b)
+                zeros = b === 0 ? zeros + 1 : 0
+            }
+            return Uint8Array.from(out)
+        }
+
+        readAscii(start, len) {
+            var s = ''
+            for (var i = 0; i < len; i++) s += String.fromCharCode(this.view.getUint8(start + i))
+            return s
+        }
+    }
+
+    async function initProtobuf() {
+        if (SeiMetadata) return
+        var root = protobuf.parse(PROTO_DEF).root
+        SeiMetadata = root.lookupType('SeiMetadata')
+    }
+
+    async function loadTelemetry(tc) {
+        seiFrames = []
+        updateTelemetryDisplay(null)
+
+        // Try front camera first, then back
+        var file = allFiles[tc.pathFor("front")] || allFiles[tc.pathFor("back")]
+        if (!file) return
+
+        try {
+            await initProtobuf()
+            var buffer = await file.arrayBuffer()
+            var mp4 = new DashcamMP4(buffer)
+            seiFrames = mp4.extractSeiFrames(SeiMetadata)
+        } catch(e) {
+            console.log("No telemetry:", e)
+            seiFrames = []
+        }
+
+        var el = document.querySelector(".telemetry")
+        if (seiFrames.length) el.classList.add("visible")
+        else el.classList.remove("visible")
+    }
+
+    function findSeiAtTime(seconds) {
+        if (!seiFrames.length) return null
+        var lo = 0, hi = seiFrames.length - 1
+        while (lo < hi) {
+            var mid = (lo + hi + 1) >> 1
+            if (seiFrames[mid].time <= seconds) lo = mid
+            else hi = mid - 1
+        }
+        return seiFrames[lo].time <= seconds ? seiFrames[lo].sei : null
+    }
+
+    var GEARS = ['P', 'D', 'R', 'N']
+    var AP_STATES = ['Off', 'FSD', 'Autosteer', 'TACC']
+
+    function updateTelemetryDisplay(sei) {
+        var el = document.querySelector(".telemetry")
+        if (!sei) { el.classList.remove("visible"); return }
+
+        var speed = sei.vehicleSpeedMps || 0
+        if (currentUnit === 'metric')
+            document.querySelector('.tele-speed').textContent = (speed * 3.6).toFixed(0) + ' km/h'
+        else
+            document.querySelector('.tele-speed').textContent = (speed * 2.23694).toFixed(0) + ' mph'
+
+        document.querySelector('.tele-gear').textContent = GEARS[sei.gearState] || '?'
+
+        var steerAngle = sei.steeringWheelAngle || 0
+        document.querySelector('.tele-steering-wheel').style.transform = 'rotate(' + steerAngle + 'deg)'
+        document.querySelector('.tele-steering-val').textContent = steerAngle.toFixed(1) + '\u00B0'
+
+        var pedal = sei.acceleratorPedalPosition || 0
+        document.querySelector('.tele-pedal-fill').style.height = pedal + '%'
+        document.querySelector('.tele-pedal-val').textContent = pedal.toFixed(0) + '%'
+
+        document.querySelector('.tele-blinker-left').classList.toggle('active', !!sei.blinkerOnLeft)
+        document.querySelector('.tele-blinker-right').classList.toggle('active', !!sei.blinkerOnRight)
+        document.querySelector('.tele-brake-fill').style.height = sei.brakeApplied ? '100%' : '0%'
+
+        var apEl = document.querySelector('.tele-ap')
+        var apState = sei.autopilotState || 0
+        apEl.textContent = 'AP ' + (AP_STATES[apState] || 'Off')
+        apEl.classList.toggle('engaged', apState > 0)
+    }
+
+    function toggleTheme() {
+        document.body.classList.toggle('light')
+        var btn = document.querySelector('.theme-toggle')
+        btn.innerHTML = document.body.classList.contains('light') ? '&#9790;' : '&#9788;'
+    }
+
+    function toggleUnit() {
+        currentUnit = currentUnit === 'metric' ? 'imperial' : 'metric'
+        document.querySelector('.unit-toggle').textContent =
+            currentUnit === 'metric' ? 'Show mph' : 'Show km/h'
+        var sei = findSeiAtTime(frontVideo.currentTime || 0)
+        if (sei) updateTelemetryDisplay(sei)
+    }
+
+    frontVideo.addEventListener('timeupdate', function() {
+        var sei = findSeiAtTime(frontVideo.currentTime)
+        if (sei) updateTelemetryDisplay(sei)
+    })
+
 </script>
+    </body>
 </html>
